@@ -1,0 +1,4 @@
+Basis.Core
+
+group Compiler
+    FParsec

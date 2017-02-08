@@ -1,0 +1,7 @@
+Basis.Core
+
+group Compiler
+    FParsec
+
+group UnitTest
+    Persimmon
