@@ -1,5 +1,6 @@
 ﻿namespace VainZero.Friends.Core
 
+open Basis.Core
 open Persimmon
 open Persimmon.Syntax.UseTestNameByReflection
 
@@ -79,13 +80,15 @@ module ``test Knowledge `` =
   let humanIsMortal =
     InferRule (Proposition.Create(mortal, x), Proposition.Create(human, x))
 
+  let socratesKnowledge =
+    Knowledge.Empty
+      .Add(socratesIsHuman)
+      .Add(platoIsHuman)
+      .Add(humanIsMortal)
+
   let ``test Add and FindAll`` =
     test {
-      let knowledge =
-        Knowledge.Empty
-          .Add(socratesIsHuman)
-          .Add(platoIsHuman)
-          .Add(humanIsMortal)
+      let knowledge = socratesKnowledge
       do!
         knowledge.FindAll(human)
         |> Seq.toArray
@@ -98,4 +101,43 @@ module ``test Knowledge `` =
         knowledge.FindAll(Predicate "unknown-predicate")
         |> Seq.isEmpty
         |> assertEquals true
+    }
+
+  let ``test prove`` =
+    test {
+      let knowledge = socratesKnowledge
+      do!
+        knowledge
+        |> Knowledge.prove (Proposition.Create(human, socrates)) Environment.Empty
+        |> Seq.length
+        |> assertEquals 1
+      do!
+        knowledge
+        |> Knowledge.prove (Proposition.Create(mortal, x)) Environment.Empty
+        |> Seq.length
+        |> assertEquals 2
+    }
+
+  let ``test query`` =
+    let body (prop, expected) =
+      test {
+        do!
+          socratesKnowledge
+          |> Knowledge.query (Proposition.Create(mortal, x))
+          |> Seq.map 
+            (fun assignments ->
+              assignments |> Array.map (fun (var, term) -> (var.Name, term))
+            )
+          |> Seq.toArray
+          |> assertEquals expected
+      }
+    parameterize {
+      case
+        ( Proposition.Create(mortal, x)
+        , [|
+            [|("X", socrates)|]
+            [|("X", plato)|]
+          |]
+        )
+      run body
     }
