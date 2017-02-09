@@ -62,3 +62,40 @@ module ``test Environment`` =
       case (ListTerm [x], ListTerm [x; y])
       run body
     }
+
+module ``test Knowledge `` =
+  let human = Predicate "human"
+  let mortal = Predicate "mortal"
+  let x = VarTerm (Variable.Create "X")
+  let y = VarTerm (Variable.Create "Y")
+  
+  let socrates = AtomTerm (Atom "socrates")
+  let plato = AtomTerm (Atom "plato")
+  
+  let socratesIsHuman =
+    AxiomRule (Proposition.Create(human, socrates))
+  let platoIsHuman =
+    AxiomRule (Proposition.Create(human, plato))
+  let humanIsMortal =
+    InferRule (Proposition.Create(mortal, x), Proposition.Create(human, x))
+
+  let ``test Add and FindAll`` =
+    test {
+      let knowledge =
+        Knowledge.Empty
+          .Add(socratesIsHuman)
+          .Add(platoIsHuman)
+          .Add(humanIsMortal)
+      do!
+        knowledge.FindAll(human)
+        |> Seq.toArray
+        |> assertEquals [|socratesIsHuman; platoIsHuman|]
+      do!
+        knowledge.FindAll(mortal)
+        |> Seq.toArray
+        |> assertEquals [|humanIsMortal|]
+      do!
+        knowledge.FindAll(Predicate "unknown-predicate")
+        |> Seq.isEmpty
+        |> assertEquals true
+    }

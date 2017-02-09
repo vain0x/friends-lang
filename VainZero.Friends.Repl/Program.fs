@@ -15,7 +15,7 @@ module Console =
       readYesNo ()
 
 module Program =
-  let knowledge = Knowledge.Empty()
+  let mutable knowledge = Knowledge.Empty
 
   let quote s =
     sprintf "「%s」" s
@@ -56,7 +56,7 @@ module Program =
     | Success statement ->
       match statement with
       | Rule rule ->
-        knowledge.Add(rule)
+        knowledge <- knowledge.Add(rule)
       | Query prop ->
         query prop
     | Failure message ->

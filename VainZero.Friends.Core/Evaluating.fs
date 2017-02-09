@@ -1,6 +1,8 @@
 ﻿namespace VainZero.Friends.Core
 
 open System.Collections.Generic
+open ExtCore.Collections
+open VainZero
 
 module Counter =
   let counter = ref 0
@@ -59,30 +61,29 @@ module Rule =
       let body = Proposition.replaceId id body
       InferRule (head, body)
 
-type Knowledge(dictionary: Dictionary<Predicate, ResizeArray<Rule>>) =
+type Knowledge(map: HashMap<Predicate, vector<Rule>>) =
   member this.FindAll(predicate) =
-    match dictionary.TryGetValue(predicate) with
-    | (true, rules) ->
+    match map.TryFind(predicate) with
+    | Some rules ->
       rules :> seq<_>
-    | (false, _) ->
+    | None ->
       Seq.empty
 
   member this.Add(rule) =
     let predicate = (rule: Rule).Predicate
-    match dictionary.TryGetValue(predicate) with
-    | (true, clauses) ->
-      clauses.Add(rule)
-    | (false, _) ->
-      dictionary.Add(predicate, ResizeArray([|rule|]))
+    match map.TryFind(predicate) with
+    | Some rules ->
+      Knowledge(map.Add(predicate, Vector.append rules (Vector.singleton rule)))
+    | None ->
+      Knowledge(map.Add(predicate, Vector.singleton rule))
 
-  static member Empty() =
-    Knowledge(Dictionary<_, _>())
+  static member Empty =
+    Knowledge(HashMap.empty)
 
   static member FromRules(rules) =
-    let knowledge = Knowledge.Empty()
-    for rule in rules do
-      knowledge.Add(rule)
-    knowledge
+    rules |> Seq.fold
+      (fun knowledge rule -> (knowledge: Knowledge).Add(rule))
+      Knowledge.Empty
 
 type Environment(map: Map<Variable, Term>) =
   let tryFind var =
@@ -166,9 +167,6 @@ module Knowledge =
           | None -> ()
       }
     prove prop env
-
-  let state rule knowledge =
-    (knowledge: Knowledge).Add(rule)
 
   let query prop knowledge =
     seq {
