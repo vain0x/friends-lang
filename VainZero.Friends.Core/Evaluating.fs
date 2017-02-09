@@ -71,11 +71,14 @@ type Knowledge(map: HashMap<Predicate, vector<Rule>>) =
 
   member this.Add(rule) =
     let predicate = (rule: Rule).Predicate
-    match map.TryFind(predicate) with
-    | Some rules ->
-      Knowledge(map.Add(predicate, Vector.append rules (Vector.singleton rule)))
-    | None ->
-      Knowledge(map.Add(predicate, Vector.singleton rule))
+    let newRules = Vector.singleton rule
+    let rules =
+      match map.TryFind(predicate) with
+      | Some rules ->
+        Vector.append rules newRules
+      | None ->
+        newRules
+    Knowledge(map.Add(predicate, rules))
 
   static member Empty =
     Knowledge(HashMap.empty)
