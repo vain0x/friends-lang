@@ -20,11 +20,14 @@ module Term =
   let nil =
     AtomTerm (Atom NilName)
 
-  let listFromSeq xs =
+  let listWithTailFromSeq tailTerm terms =
     Seq.foldBack
       (fun headTerm tailTerm -> ConsTerm (headTerm, tailTerm))
-      xs
-      nil
+      terms
+      tailTerm
+
+  let listFromSeq terms =
+    listWithTailFromSeq nil terms
 
   let seqFromList headTerm tailTerm =
     let rec toList acc =

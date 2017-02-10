@@ -58,6 +58,10 @@ module ``test Parsing`` =
         ( "0 と だれ"
         , listTerm [zero; dare]
         )
+      case
+        ( "0 と サーバル と だれ とか"
+        , Term.listWithTailFromSeq dare [zero; serval]
+        )
       run body
     }
 

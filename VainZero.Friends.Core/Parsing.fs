@@ -3,6 +3,7 @@
 open System
 open Basis.Core
 open FParsec
+open VainZero.Collections
 
 module Parsing =
   module internal Internal =
@@ -99,10 +100,17 @@ module Parsing =
       parse {
         let separatorParser = spaces1 >>. skipChar 'と' >>. spaces1
         let! (term, terms) = list1Parser appTermParser separatorParser
+        let! endsWithTail =
+          (spaces1 >>. skipString "とか") |> attempt |> opt
+          |>> Option.isSome
         return
-          if terms |> List.isEmpty
-          then term
-          else (term :: terms) |> Term.listFromSeq
+          if terms |> List.isEmpty then
+            term
+          else if endsWithTail then
+            let (terms, tailTerm) = (term, terms) |> NonemptyList.decomposeLast
+            Term.listWithTailFromSeq tailTerm terms
+          else
+            (term :: terms) |> Term.listFromSeq
       }
 
     termParserRef :=
