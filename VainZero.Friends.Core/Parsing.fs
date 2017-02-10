@@ -25,6 +25,14 @@ module Parsing =
 
     type Parser<'x> = Parser<'x, unit>
 
+    let list1Parser p op =
+      parse {
+        let separatorParser =
+          attempt (op |>> (fun () l r -> Node(l, r)))
+        let! tree = chainl1 (p |>> Leaf) separatorParser
+        return tree |> BinaryTree.toSeq |> Seq.toList
+      }
+
     let hagamoParser: Parser<unit> =
       skipAnyOf "はがも"
 
@@ -56,19 +64,8 @@ module Parsing =
 
     let listTermParser =
       parse {
-        let elementParser =
-          parse {
-            let! term = atomicTermParser
-            return Leaf term
-          }
-        let separatorParser =
-          parse {
-            do! spaces1 >>. skipChar 'と' >>. spaces1
-            return fun left right -> Node (left, right)
-          }
-          |> attempt
-        let! tree = chainl1 elementParser separatorParser
-        let terms = tree |> BinaryTree.toSeq |> Seq.toList
+        let separatorParser = spaces1 >>. skipChar 'と' >>. spaces1
+        let! terms = list1Parser atomicTermParser separatorParser
         match terms with
         | [term] ->
           return term
