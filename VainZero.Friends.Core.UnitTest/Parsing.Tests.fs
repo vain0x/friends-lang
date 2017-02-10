@@ -13,6 +13,29 @@ module ``test Parsing`` =
   let kimi = VarTerm (Variable.Create("きみ"))
   let dare = VarTerm (Variable.Create("だれ"))
 
+  let app f t = AppTerm (Atom f, t)
+
+  let ``test parseTerm can parse terms`` =
+    let body (source, expected) =
+      test {
+        match Parsing.parseTerm source with
+        | Success term ->
+          do! term |> assertEquals expected
+        | Failure message ->
+          return! fail message
+      }
+    parameterize {
+      case
+        ( "サーバル の みみ"
+        , serval |> app "みみ"
+        )
+      case
+        ( "サーバル の みみ の あな の なか"
+        , serval |> app "みみ" |> app "あな" |> app "なか"
+        )
+      run body
+    }
+
   let ``test parseStatement can parse rules`` =
     let body (source, expected) =
       test {

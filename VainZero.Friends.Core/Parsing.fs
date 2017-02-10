@@ -62,10 +62,32 @@ module Parsing =
       attempt varTermParser
       <|> atomTermParser
 
+    let appTermParser =
+      parse {
+        let separatorParser = spaces1 >>. skipChar 'の' >>. spaces1
+        let! terms = list1Parser atomicTermParser separatorParser
+        match terms with
+        | [] -> failwith "never"
+        | term :: terms ->
+          let rec functors terms =
+            parse {
+              match terms with
+              | [] ->
+                return []
+              | (AtomTerm atom :: terms) ->
+                let! tail = functors terms
+                return atom :: tail
+              | _ ->
+                return! fail "Functor must be an atom."
+            }
+          let! atoms = functors terms
+          return atoms |> Seq.fold (fun term atom -> AppTerm (atom, term)) term
+      }
+
     let listTermParser =
       parse {
         let separatorParser = spaces1 >>. skipChar 'と' >>. spaces1
-        let! terms = list1Parser atomicTermParser separatorParser
+        let! terms = list1Parser appTermParser separatorParser
         match terms with
         | [term] ->
           return term
@@ -129,9 +151,17 @@ module Parsing =
         return statement
       }
 
+    let run source parser =
+      match runParserOnString parser () "にゅうりょく" source with
+      | Success (statement, (), _) ->
+        statement |> Result.Success
+      | Failure (message, _, _) ->
+        message |> Result.Failure
+
+  open Internal
+
+  let parseTerm source =
+    termParser |> run source
+
   let parseStatement source =
-    match runParserOnString Internal.inputParser () "にゅうりょく" source with
-    | Success (statement, (), _) ->
-      statement |> Result.Success
-    | Failure (message, _, _) ->
-      message |> Result.Failure
+    inputParser |> run source
