@@ -37,8 +37,11 @@ module Parsing =
     let hagamoParser: Parser<unit> =
       skipAnyOf "はがも"
 
+    let identifierCharParser =
+      letter <|> digit <|> pchar '_'
+
     let identifierParser: Parser<string> =
-      many1Chars (letter <|> digit <|> pchar '_')
+      many1Chars identifierCharParser
 
     let (termParser: Parser<Term>, termParserRef) =
       createParserForwardedToRef ()
@@ -61,7 +64,7 @@ module Parsing =
     let naturalTermParser =
       parse {
         let! digits = many1Chars digit
-        do! notFollowedBy (letter <|> pchar '_')
+        do! notFollowedBy identifierCharParser
         match Int32.TryParse(digits) with
         | (true, n) ->
           return Term.ofNatural n
