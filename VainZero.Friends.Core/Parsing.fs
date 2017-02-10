@@ -63,7 +63,7 @@ module Parsing =
       let succ = Atom "次"
       parse {
         let! digits = many1Chars digit
-        do! notFollowedBy termParser
+        do! notFollowedBy (letter <|> pchar '_')
         match Int32.TryParse(digits) with
         | (true, n) ->
           if n < 0 then
