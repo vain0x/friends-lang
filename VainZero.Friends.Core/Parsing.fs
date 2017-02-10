@@ -121,11 +121,24 @@ module Parsing =
         return (Predicate predicateName).[term]
       }
 
-    let propositionParser =
+    let andPropositionParser =
       parse {
-        let! prop = atomicPropositionParser
-        return AtomicProposition prop
+        let elementParser =
+          parse {
+            let! prop = atomicPropositionParser
+            return AtomicProposition prop
+          }
+        let separatorParser =
+          spaces1 >>. skipString "で" >>. spaces1
+        let! (prop, props) = list1Parser elementParser separatorParser
+        return
+          if props |> List.isEmpty
+          then prop
+          else AndProposition (Vector.ofList (prop :: props))
       }
+
+    let propositionParser =
+      andPropositionParser
 
     let axiomRuleParser =
       parse {

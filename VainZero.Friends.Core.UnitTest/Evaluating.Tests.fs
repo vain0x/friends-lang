@@ -200,3 +200,63 @@ module ``test Knowledge `` =
         )
       run body
     }
+
+  module ``test FizzBuzz`` =
+    let zero = AtomTerm (Atom "0")
+    let app f t = AppTerm (Atom f, t)
+    let succ t = AppTerm (Atom "次", t)
+    let andProp props = AndProposition (Vector.ofSeq props)
+
+    let fizzAtom = AtomTerm (Atom "Fizz")
+    let buzzAtom = AtomTerm (Atom "Buzz")
+    let fizzBuzzAtom = AtomTerm (Atom "FizzBuzz")
+    let fizzBuzzPredicate =
+      Predicate "FizzBuzz"
+    let fizzBuzzProposition x y =
+      fizzBuzzPredicate.[Term.listFromSeq [x; y]]
+    let multiple3 = Predicate "multiple-3"
+    let multiple5 = Predicate "multiple-5"
+    let multiple15 = Predicate "multiple-15"
+
+    let knowledge =
+      [|
+        AxiomRule multiple3.[zero]
+        InferRule
+          ( multiple3.[x |> succ |> succ |> succ]
+          , AtomicProposition multiple3.[x]
+          )
+        AxiomRule multiple5.[zero]
+        InferRule
+          ( multiple5.[x |> succ |> succ |> succ |> succ |> succ]
+          , AtomicProposition multiple5.[x]
+          )
+        InferRule
+          ( multiple15.[x]
+          , andProp ([multiple3.[x]; multiple5.[x]] |> List.map AtomicProposition)
+          )
+      |]
+      |> fun rules -> Knowledge.FromRules(rules)
+
+    let prove prop = knowledge |> Knowledge.prove prop Environment.Empty
+
+    let ``test prove`` =
+      test {
+        do!
+          prove (AtomicProposition multiple3.[zero]) |> Seq.length
+          |> assertEquals 1
+        do!
+          prove (AtomicProposition multiple3.[Term.ofNatural 1]) |> Seq.length
+          |> assertEquals 0
+        do!
+          prove (AtomicProposition multiple3.[Term.ofNatural 6]) |> Seq.length
+          |> assertEquals 1
+        do!
+          prove (AtomicProposition multiple15.[Term.zero]) |> Seq.length
+          |> assertEquals 1
+        do!
+          prove (AtomicProposition multiple15.[Term.ofNatural 6]) |> Seq.length
+          |> assertEquals 0
+        do!
+          prove (AtomicProposition multiple15.[Term.ofNatural 30]) |> Seq.length
+          |> assertEquals 1
+      }

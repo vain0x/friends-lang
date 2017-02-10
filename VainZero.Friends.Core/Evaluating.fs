@@ -96,11 +96,15 @@ module Proposition =
     function
     | AtomicProposition prop ->
       prop.Term |> Term.variables
+    | AndProposition props ->
+      props |> Seq.collect variables
 
   let rec replaceId id =
     function
     | AtomicProposition prop ->
       AtomicProposition (prop |> AtomicProposition.replaceId id)
+    | AndProposition props ->
+      AndProposition (props |> Vector.map (replaceId id))
 
   let rec refresh prop =
     replaceId (Counter.nextId ()) prop
@@ -216,6 +220,10 @@ module Knowledge =
       match prop with
       | AtomicProposition prop ->
         proveAtomicProposition prop env knowledge
+      | AndProposition props ->
+        props |> Vector.fold
+          (fun envs prop -> envs |> Seq.collect (prove prop))
+          (Seq.singleton env)
     and proveAtomicProposition (prop: AtomicProposition) env knowledge =
       seq {
         for rule in knowledge.FindAll(prop.Predicate) do

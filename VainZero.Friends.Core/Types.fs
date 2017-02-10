@@ -64,6 +64,8 @@ with
 type Proposition =
   | AtomicProposition
     of AtomicProposition
+  | AndProposition
+    of vector<Proposition>
 
 type Rule =
   | AxiomRule
