@@ -44,8 +44,13 @@ module Parsing =
       createParserForwardedToRef ()
 
     let atomOrVarTermParser =
+      let predefinedVarNames =
+        [|
+          "あなた"; "きみ"; "だれ"
+          "なに"; "あれ"; "これ"; "これら"; "それ"; "それら"
+        |]
+        |> set
       parse {
-        let predefinedVarNames = [|"あなた"; "きみ"; "だれ"; "なに"|] |> set
         let! name = identifierParser
         return
           if predefinedVarNames |> Set.contains name || name.StartsWith("_")
