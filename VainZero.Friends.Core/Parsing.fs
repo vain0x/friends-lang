@@ -187,7 +187,7 @@ module Parsing =
       }
 
     let run source parser =
-      match runParserOnString parser () "にゅうりょく" source with
+      match runParserOnString parser () "input" source with
       | Success (statement, (), _) ->
         statement |> Result.Success
       | Failure (message, _, _) ->
