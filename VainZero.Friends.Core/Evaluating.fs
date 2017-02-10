@@ -38,6 +38,16 @@ module Term =
         (acc |> List.rev, term)
     toList [headTerm] tailTerm
 
+  let zero =
+    AtomTerm (Atom "0")
+
+  let succ t =
+    AppTerm (Atom "次", t)
+
+  let ofNatural n =
+    if n < 0 then invalidArg (string n) "Must be positive."
+    seq {0..(n - 1)} |> Seq.fold (fun t _ -> succ t) zero
+
   let rec variables term =
     seq {
       match term with

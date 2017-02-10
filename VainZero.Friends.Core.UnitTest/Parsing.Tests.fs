@@ -12,7 +12,6 @@ module ``test Parsing`` =
   let kimi = VarTerm (Variable.Create("きみ"))
   let dare = VarTerm (Variable.Create("だれ"))
 
-  let zero = AtomTerm (Atom "0")
   let app f t = AppTerm (Atom f, t)
   let listTerm xs = Term.listFromSeq xs
 
@@ -28,15 +27,15 @@ module ``test Parsing`` =
     parameterize {
       case
         ( "0"
-        , zero
+        , Term.zero
         )
       case
         ( "1"
-        , zero |> app "次"
+        , Term.zero |> Term.succ
         )
       case
         ( "2"
-        , zero |> app "次" |> app "次"
+        , Term.zero |> Term.succ |> Term.succ
         )
       case
         ( "サーバル の みみ"
@@ -56,11 +55,11 @@ module ``test Parsing`` =
         )
       case
         ( "0 と だれ"
-        , listTerm [zero; dare]
+        , listTerm [Term.zero; dare]
         )
       case
         ( "0 と サーバル と だれ とか"
-        , Term.listWithTailFromSeq dare [zero; serval]
+        , Term.listWithTailFromSeq dare [Term.zero; serval]
         )
       run body
     }

@@ -59,21 +59,12 @@ module Parsing =
       }
 
     let naturalTermParser =
-      let succ = Atom "次"
       parse {
         let! digits = many1Chars digit
         do! notFollowedBy (letter <|> pchar '_')
         match Int32.TryParse(digits) with
         | (true, n) ->
-          if n < 0 then
-            failwith "never"
-          else
-            let rec loop i =
-              if i = 0 then
-                AtomTerm (Atom "0")
-              else
-                AppTerm (succ, loop (i - 1))
-            return loop n
+          return Term.ofNatural n
         | (false, _) ->
           return! fail "Too large numeric literal."
       }
