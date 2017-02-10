@@ -47,8 +47,6 @@ module Program =
         head
       | _ ->
         sprintf "%s と %s とか" head (printTerm tailTerm)
-    | ConsTerm (headTerm, tailTerm) ->
-      NotImplementedException() |> raise
 
   let query prop =
     let assignments = knowledge |> Knowledge.query prop
