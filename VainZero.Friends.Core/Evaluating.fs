@@ -164,7 +164,8 @@ type Environment(map: Map<Variable, Term>) =
       ConsTerm (headTerm |> substitute, tailTerm |> substitute)
 
   let add v term =
-    if substitute term = VarTerm v then
+    let term = substitute term
+    if term = VarTerm v then
       map
     else
       map |> Map.add v term
