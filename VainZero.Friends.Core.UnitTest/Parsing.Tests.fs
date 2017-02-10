@@ -53,6 +53,10 @@ module ``test Parsing`` =
         ( "サーバル の しっぽ と かばんちゃん の みみ"
         , ListTerm [(serval |> app "しっぽ"); (kabanChan |> app "みみ")]
         )
+      case
+        ( "0 と だれ"
+        , ListTerm [zero; dare]
+        )
       run body
     }
 

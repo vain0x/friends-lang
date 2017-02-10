@@ -40,23 +40,17 @@ module Parsing =
     let identifierParser: Parser<string> =
       many1Chars (letter <|> digit <|> pchar '_')
 
-    let varIdentifierParser =
-      attempt (regex @"あなた|きみ|だれ|なに")
-      <|> (followedBy (skipChar '_') >>. identifierParser)
-
     let (termParser: Parser<Term>, termParserRef) =
       createParserForwardedToRef ()
 
-    let varTermParser =
+    let atomOrVarTermParser =
       parse {
-        let! name = varIdentifierParser
-        return VarTerm (Variable.Create(name))
-      }
-
-    let atomTermParser =
-      parse {
+        let predefinedVarNames = [|"あなた"; "きみ"; "だれ"; "なに"|] |> set
         let! name = identifierParser
-        return AtomTerm (Atom name)
+        return
+          if predefinedVarNames |> Set.contains name || name.StartsWith("_")
+          then VarTerm (Variable.Create(name))
+          else AtomTerm (Atom name)
       }
 
     let naturalTermParser =
@@ -80,9 +74,8 @@ module Parsing =
       }
 
     let atomicTermParser =
-      attempt varTermParser
-      <|> attempt naturalTermParser
-      <|> atomTermParser
+      attempt naturalTermParser
+      <|> atomOrVarTermParser
 
     let appTermParser =
       parse {
