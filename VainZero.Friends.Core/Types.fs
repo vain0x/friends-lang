@@ -45,7 +45,7 @@ type Term =
   | ConsTerm
     of Term * Term
 
-type Proposition =
+type AtomicProposition =
   {
     Predicate:
       Predicate
@@ -61,11 +61,15 @@ with
         term
     }
 
+type Proposition =
+  | AtomicProposition
+    of AtomicProposition
+
 type Rule =
   | AxiomRule
-    of Proposition
+    of AtomicProposition
   | InferRule
-    of Proposition * Proposition
+    of AtomicProposition * Proposition
 with
   member this.Head =
     match this with
@@ -82,3 +86,8 @@ type Statement =
     of Rule
   | Query
     of Proposition
+
+type Predicate with
+  member this.Item
+    with get term =
+      AtomicProposition.Create(this, term)

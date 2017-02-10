@@ -81,13 +81,13 @@ module ``test Parsing`` =
     parameterize {
       case
         ( "すごーい！ かばんちゃん は ヒトの フレンズなんだね！"
-        , AxiomRule (Proposition.Create(human, kabanChan))
+        , AxiomRule (human.[kabanChan])
         )
       case
         ( "すごーい！ きみ が ヒトの フレンズなら きみ は しっぽのない フレンズなんだね！"
         , InferRule
-            ( Proposition.Create(tailless, kimi)
-            , Proposition.Create(human, kimi)
+            ( tailless.[kimi]
+            , AtomicProposition (human.[kimi])
             )
         )
       run body
@@ -109,7 +109,7 @@ module ``test Parsing`` =
     parameterize {
       case
         ( "だれ が しっぽのない フレンズなんだっけ？"
-        , Proposition.Create(tailless, dare)
+        , AtomicProposition tailless.[dare]
         )
       run body
     }

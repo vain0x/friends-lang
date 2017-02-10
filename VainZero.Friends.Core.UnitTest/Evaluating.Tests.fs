@@ -123,11 +123,14 @@ module ``test Knowledge `` =
   let plato = AtomTerm (Atom "plato")
   
   let socratesIsHuman =
-    AxiomRule (Proposition.Create(human, socrates))
+    AxiomRule (human.[socrates])
   let platoIsHuman =
-    AxiomRule (Proposition.Create(human, plato))
+    AxiomRule (human.[plato])
   let humanIsMortal =
-    InferRule (Proposition.Create(mortal, x), Proposition.Create(human, x))
+    InferRule
+      ( mortal.[x]
+      , AtomicProposition (human.[x])
+      )
 
   let socratesKnowledge =
     Knowledge.Empty
@@ -155,14 +158,15 @@ module ``test Knowledge `` =
   let ``test prove`` =
     test {
       let knowledge = socratesKnowledge
+      let prove prop = Knowledge.prove prop Environment.Empty
       do!
         knowledge
-        |> Knowledge.prove (Proposition.Create(human, socrates)) Environment.Empty
+        |> prove (AtomicProposition (human.[socrates]))
         |> Seq.length
         |> assertEquals 1
       do!
         knowledge
-        |> Knowledge.prove (Proposition.Create(mortal, x)) Environment.Empty
+        |> prove (AtomicProposition (mortal.[x]))
         |> Seq.length
         |> assertEquals 2
     }
@@ -172,7 +176,7 @@ module ``test Knowledge `` =
       test {
         do!
           socratesKnowledge
-          |> Knowledge.query (Proposition.Create(mortal, x))
+          |> Knowledge.query prop
           |> Seq.map 
             (fun assignments ->
               assignments |> Array.map (fun (var, term) -> (var.Name, term))
@@ -182,7 +186,7 @@ module ``test Knowledge `` =
       }
     parameterize {
       case
-        ( Proposition.Create(mortal, x)
+        ( AtomicProposition mortal.[x]
         , [|
             [|("X", socrates)|]
             [|("X", plato)|]

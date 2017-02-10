@@ -127,7 +127,13 @@ module Parsing =
         do! spaces1 >>. hagamoParser >>. spaces1
         let! predicateName = identifierParser
         do! spaces1 >>. skipString "フレンズ"
-        return Proposition.Create(Predicate predicateName, term)
+        return (Predicate predicateName).[term]
+      }
+
+    let propositionParser =
+      parse {
+        let! prop = atomicPropositionParser
+        return AtomicProposition prop
       }
 
     let axiomRuleParser =
@@ -139,7 +145,7 @@ module Parsing =
 
     let inferRuleParser =
       parse {
-        let! bodyProp = atomicPropositionParser
+        let! bodyProp = propositionParser
         do! spaces >>. skipString "なら" >>. spaces1
         let! headProp = atomicPropositionParser
         do! spaces >>. skipString "なんだね！"
@@ -154,11 +160,8 @@ module Parsing =
 
     let queryParser =
       parse {
-        let! term = termParser
-        do! spaces1 >>. hagamoParser >>. spaces1
-        let! predicateName = identifierParser
-        do! spaces1 >>. skipString "フレンズ" >>. spaces >>. skipString "なんだっけ？"
-        let prop = Proposition.Create(Predicate predicateName, term)
+        let! prop = propositionParser
+        do! spaces >>. skipString "なんだっけ？"
         return Query prop
       }
 

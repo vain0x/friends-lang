@@ -72,10 +72,25 @@ module TermExtension =
     | AtomTerm (Atom Term.NilName) -> Some ()
     | _ -> None
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]  
+module AtomicProposition =
+  let rec replaceId id (prop: AtomicProposition) =
+    prop.Predicate.[prop.Term |> Term.replaceId id]
+
+  let rec refresh prop =
+    replaceId (Counter.nextId ()) prop
+
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Proposition =
-  let rec replaceId id (prop: Proposition) =
-    Proposition.Create(prop.Predicate, prop.Term |> Term.replaceId id)
+  let rec variables =
+    function
+    | AtomicProposition prop ->
+      prop.Term |> Term.variables
+
+  let rec replaceId id =
+    function
+    | AtomicProposition prop ->
+      AtomicProposition (prop |> AtomicProposition.replaceId id)
 
   let rec refresh prop =
     replaceId (Counter.nextId ()) prop
@@ -85,10 +100,10 @@ module Rule =
   let rec refresh =
     function
     | AxiomRule prop ->
-      AxiomRule (prop |> Proposition.refresh)
+      AxiomRule (prop |> AtomicProposition.refresh)
     | InferRule (head, body) ->
       let id = Counter.nextId ()
-      let head = Proposition.replaceId id head
+      let head = AtomicProposition.replaceId id head
       let body = Proposition.replaceId id body
       InferRule (head, body)
 
@@ -180,7 +195,11 @@ module Environment =
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Knowledge =
   let prove (prop: Proposition) (env: Environment) (knowledge: Knowledge) =
-    let rec prove (prop: Proposition) env =
+    let rec prove prop env =
+      match prop with
+      | AtomicProposition prop ->
+        proveAtomicProposition prop env knowledge
+    and proveAtomicProposition (prop: AtomicProposition) env knowledge =
       seq {
         for rule in knowledge.FindAll(prop.Predicate) do
           let rule = rule |> Rule.refresh
@@ -199,7 +218,7 @@ module Knowledge =
   let query prop knowledge =
     seq {
       let prop = prop |> Proposition.refresh
-      let variables = Term.variables prop.Term
+      let variables = Proposition.variables prop
       let envs = prove prop Environment.Empty knowledge
       for env in envs do
         yield
