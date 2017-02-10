@@ -39,8 +39,16 @@ module Program =
       sprintf "%s の %s" (printTerm term) (quote a.Name)
     | AtomTerm a ->
       quote a.Name
-    | ListTerm terms ->
-      terms |> Seq.map printTerm |> String.concat " と "
+    | ConsTerm (headTerm, tailTerm) ->
+      let (terms, tailTerm) = Term.seqFromList headTerm tailTerm
+      let head = terms |> Seq.map printTerm |> String.concat " と "
+      match tailTerm with
+      | NilTerm ->
+        head
+      | _ ->
+        sprintf "%s と %s とか" head (printTerm tailTerm)
+    | ConsTerm (headTerm, tailTerm) ->
+      NotImplementedException() |> raise
 
   let query prop =
     let assignments = knowledge |> Knowledge.query prop

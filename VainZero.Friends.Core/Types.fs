@@ -42,8 +42,8 @@ type Term =
     of Atom
   | AppTerm
     of Atom * Term
-  | ListTerm
-    of list<Term>
+  | ConsTerm
+    of Term * Term
 
 type Proposition =
   {

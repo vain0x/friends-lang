@@ -14,6 +14,7 @@ module ``test Parsing`` =
 
   let zero = AtomTerm (Atom "0")
   let app f t = AppTerm (Atom f, t)
+  let listTerm xs = Term.listFromSeq xs
 
   let ``test parseTerm can parse terms`` =
     let body (source, expected) =
@@ -47,15 +48,15 @@ module ``test Parsing`` =
         )
       case
         ( "サーバル と かばんちゃん"
-        , ListTerm [serval; kabanChan]
+        , listTerm [serval; kabanChan]
         )
       case
         ( "サーバル の しっぽ と かばんちゃん の みみ"
-        , ListTerm [(serval |> app "しっぽ"); (kabanChan |> app "みみ")]
+        , listTerm [(serval |> app "しっぽ"); (kabanChan |> app "みみ")]
         )
       case
         ( "0 と だれ"
-        , ListTerm [zero; dare]
+        , listTerm [zero; dare]
         )
       run body
     }

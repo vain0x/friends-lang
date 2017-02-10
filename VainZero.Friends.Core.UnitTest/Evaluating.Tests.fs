@@ -4,11 +4,38 @@ open Basis.Core
 open Persimmon
 open Persimmon.Syntax.UseTestNameByReflection
 
+module ``test Term`` =
+  let x = VarTerm (Variable.Create("X"))
+  let y = VarTerm (Variable.Create("Y"))
+  let listTerm = Term.listFromSeq
+
+  let ``test seqFromList`` =
+    let body ((headTerm, tailTerm), expected) =
+      test {
+        do! Term.seqFromList headTerm tailTerm |> assertEquals expected
+      }
+    parameterize {
+      case
+        ( (x, Term.nil)
+        , ([x], Term.nil)
+        )
+      case
+        ( (x, ConsTerm (y, Term.nil))
+        , ([x; y], Term.nil)
+        )
+      case
+        ( (x, ConsTerm (x, y))
+        , ([x; x], y)
+        )
+      run body
+    }
+
 module ``test Environment`` =
   let x = VarTerm (Variable.Create("X"))
   let y = VarTerm (Variable.Create("Y"))
   let socrates = AtomTerm (Atom "socrates")
   let plato = AtomTerm (Atom "plato")
+  let listTerm = Term.listFromSeq
 
   let ``test tryUnify success`` =
     let body (term, term', testTerm, expected) =
@@ -37,13 +64,13 @@ module ``test Environment`` =
         , x, socrates
         )
       case
-        ( x, ListTerm [socrates; plato]
-        , x, ListTerm [socrates; plato]
+        ( x, listTerm [socrates; plato]
+        , x, listTerm [socrates; plato]
         )
       // Each list term matches the list term with the same content.
       case
-        ( ListTerm [x; y]
-        , ListTerm [socrates; plato]
+        ( listTerm [x; y]
+        , listTerm [socrates; plato]
         , x, socrates
         )
       run body
@@ -60,7 +87,7 @@ module ``test Environment`` =
       }
     parameterize {
       case (socrates, plato)
-      case (ListTerm [x], ListTerm [x; y])
+      case (listTerm [x], listTerm [x; y])
       run body
     }
 

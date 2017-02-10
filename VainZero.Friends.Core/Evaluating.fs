@@ -14,6 +14,27 @@ module Counter =
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Term =
+  [<Literal>]
+  let NilName = "nil"
+
+  let nil =
+    AtomTerm (Atom NilName)
+
+  let listFromSeq xs =
+    Seq.foldBack
+      (fun headTerm tailTerm -> ConsTerm (headTerm, tailTerm))
+      xs
+      nil
+
+  let seqFromList headTerm tailTerm =
+    let rec toList acc =
+      function
+      | ConsTerm (headTerm, tailTerm) ->
+        toList (headTerm :: acc) tailTerm
+      | term ->
+        (acc |> List.rev, term)
+    toList [headTerm] tailTerm
+
   let rec variables term =
     seq {
       match term with
@@ -23,9 +44,9 @@ module Term =
         yield! variables term
       | AtomTerm _ ->
         ()
-      | ListTerm terms ->
-        for term in terms do
-          yield! variables term
+      | ConsTerm (headTerm, tailTerm) ->
+        yield! variables headTerm
+        yield! variables tailTerm
     }
 
   let rec replaceId id =
@@ -37,9 +58,16 @@ module Term =
         term
       | AppTerm (atom, term) ->
         AppTerm (atom, term |> loop)
-      | ListTerm terms ->
-        ListTerm (terms |> List.map loop)
+      | ConsTerm (headTerm, tailTerm) ->
+        ConsTerm (headTerm |> loop, tailTerm |> loop)
     loop
+
+[<AutoOpen>]
+module TermExtension =
+  let (|NilTerm|_|) =
+    function
+    | AtomTerm (Atom Term.NilName) -> Some ()
+    | _ -> None
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Proposition =
@@ -104,8 +132,8 @@ type Environment(map: Map<Variable, Term>) =
       term
     | AppTerm (atom, term) ->
       AppTerm (atom, substitute term)
-    | ListTerm terms ->
-      ListTerm (terms |> List.map substitute)
+    | ConsTerm (headTerm, tailTerm)  ->
+      ConsTerm (headTerm |> substitute, tailTerm |> substitute)
 
   let add v term =
     if substitute term = VarTerm v then
@@ -139,16 +167,10 @@ module Environment =
     | (AppTerm (atom, arg), AppTerm (atom', arg'))
       when atom = atom' ->
       env |> tryUnify arg arg'
-    | (ListTerm terms, ListTerm terms') ->
-      let rec tryUnifyZip terms terms' env =
-        match (terms, terms') with
-        | ([], []) ->
-          env |> Some
-        | (term :: terms, term' :: terms') ->
-          env |> tryUnify term term' |> Option.bind (tryUnifyZip terms terms')
-        | _ ->
-          None
-      env |> tryUnifyZip terms terms'
+    | (ConsTerm (headTerm, tailTerm), ConsTerm (headTerm', tailTerm')) ->
+      env
+      |> tryUnify headTerm headTerm'
+      |> Option.bind (tryUnify tailTerm tailTerm')
     | (_, _) ->
       None
 

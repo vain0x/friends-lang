@@ -102,7 +102,7 @@ module Parsing =
         return
           if terms |> List.isEmpty
           then term
-          else ListTerm (term :: terms)
+          else (term :: terms) |> Term.listFromSeq
       }
 
     termParserRef :=
