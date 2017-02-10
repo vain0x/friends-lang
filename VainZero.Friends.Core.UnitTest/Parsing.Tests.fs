@@ -7,7 +7,6 @@ open Persimmon.Syntax.UseTestNameByReflection
 module ``test Parsing`` =
   let human = Predicate "ヒトの"
   let tailless = Predicate "しっぽのない"
-  let friends = Predicate "ともだちの"
   let kabanChan = AtomTerm (Atom "かばんちゃん")
   let serval = AtomTerm (Atom "サーバル")
   let kimi = VarTerm (Variable.Create("きみ"))
@@ -32,6 +31,14 @@ module ``test Parsing`` =
       case
         ( "サーバル の みみ の あな の なか"
         , serval |> app "みみ" |> app "あな" |> app "なか"
+        )
+      case
+        ( "サーバル と かばんちゃん"
+        , ListTerm [serval; kabanChan]
+        )
+      case
+        ( "サーバル の しっぽ と かばんちゃん の みみ"
+        , ListTerm [(serval |> app "しっぽ"); (kabanChan |> app "みみ")]
         )
       run body
     }
@@ -60,10 +67,6 @@ module ``test Parsing`` =
             ( Proposition.Create(tailless, kimi)
             , Proposition.Create(human, kimi)
             )
-        )
-      case
-        ( "すごーい！ サーバル と かばんちゃん は ともだちの フレンズなんだね！"
-        , AxiomRule (Proposition.Create(friends, ListTerm [serval; kabanChan]))
         )
       run body
     }
