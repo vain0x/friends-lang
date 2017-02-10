@@ -24,9 +24,6 @@ type Variable =
       int
   }
 with
-  override this.ToString() =
-    sprintf "「%s」" this.Name
-
   static member Create(name) =
     {
       Name =
