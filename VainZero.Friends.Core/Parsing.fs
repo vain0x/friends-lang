@@ -33,15 +33,17 @@ module Parsing =
         let! tree = chainl1 (p |>> Leaf) separatorParser
         return tree |> BinaryTree.toNonemptyList
       }
-
-    let hagamoParser: Parser<unit> =
-      skipAnyOf "はがも"
-
     let identifierCharParser =
       letter <|> digit <|> pchar '_'
 
     let identifierParser: Parser<string> =
       many1Chars identifierCharParser
+
+    let keywordParser wordParser =
+      spaces >>. wordParser >>. notFollowedBy identifierCharParser >>. spaces
+
+    let hagamoParser: Parser<unit> =
+      keywordParser (skipAnyOf "はがも")
 
     let (termParser: Parser<Term>, termParserRef) =
       createParserForwardedToRef ()
@@ -78,7 +80,7 @@ module Parsing =
 
     let appTermParser =
       parse {
-        let separatorParser = spaces1 >>. skipChar 'の' >>. spaces1
+        let separatorParser = keywordParser (skipChar 'の')
         let! (term, terms) = list1Parser atomicTermParser separatorParser
         let rec functors terms =
           parse {
@@ -97,10 +99,10 @@ module Parsing =
 
     let listTermParser =
       parse {
-        let separatorParser = spaces1 >>. skipChar 'と' >>. spaces1
+        let separatorParser = keywordParser (skipChar 'と')
         let! (term, terms) = list1Parser appTermParser separatorParser
         let! endsWithTail =
-          (spaces1 >>. skipString "とか") |> attempt |> opt
+          skipString "とか" |> keywordParser |> attempt |> opt
           |>> Option.isSome
         return
           if terms |> List.isEmpty then
@@ -118,9 +120,9 @@ module Parsing =
     let atomicPropositionParser =
       parse {
         let! term = termParser
-        do! spaces1 >>. hagamoParser >>. spaces1
+        do! hagamoParser
         let! predicateName = identifierParser
-        do! spaces1 >>. skipString "フレンズ"
+        do! keywordParser (skipString "フレンズ")
         return (Predicate predicateName).[term]
       }
 
@@ -132,7 +134,7 @@ module Parsing =
             return AtomicProposition prop
           }
         let separatorParser =
-          spaces1 >>. skipString "で" >>. spaces1
+          keywordParser (skipString "で")
         let! (prop, props) = list1Parser elementParser separatorParser
         return
           if props |> List.isEmpty
@@ -146,29 +148,29 @@ module Parsing =
     let axiomRuleParser =
       parse {
         let! prop = atomicPropositionParser
-        do! spaces >>. skipString "なんだね！"
+        do! keywordParser (skipString "なんだね！")
         return AxiomRule prop
       }
 
     let inferRuleParser =
       parse {
         let! bodyProp = propositionParser
-        do! spaces >>. skipString "なら" >>. spaces1
+        do! keywordParser (skipString "なら")
         let! headProp = atomicPropositionParser
-        do! spaces >>. skipString "なんだね！"
+        do! keywordParser (skipString "なんだね！")
         return InferRule (headProp, bodyProp)
       }
 
     let ruleParser =
       parse {
-        do! skipString "すごーい！" >>. spaces1
+        do! keywordParser (skipString "すごーい！")
         return! attempt axiomRuleParser <|> inferRuleParser
       }
 
     let queryParser =
       parse {
         let! prop = propositionParser
-        do! spaces >>. skipString "なんだっけ？"
+        do! keywordParser (skipString "なんだっけ？")
         return Query prop
       }
 
