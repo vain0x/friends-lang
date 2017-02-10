@@ -12,6 +12,7 @@ module ``test Parsing`` =
   let kimi = VarTerm (Variable.Create("きみ"))
   let dare = VarTerm (Variable.Create("だれ"))
 
+  let zero = AtomTerm (Atom "0")
   let app f t = AppTerm (Atom f, t)
 
   let ``test parseTerm can parse terms`` =
@@ -24,6 +25,18 @@ module ``test Parsing`` =
           return! fail message
       }
     parameterize {
+      case
+        ( "0"
+        , zero
+        )
+      case
+        ( "1"
+        , zero |> app "次"
+        )
+      case
+        ( "2"
+        , zero |> app "次" |> app "次"
+        )
       case
         ( "サーバル の みみ"
         , serval |> app "みみ"

@@ -20,10 +20,21 @@ module Program =
   let quote s =
     sprintf "「%s」" s
 
+  let rec (|NaturalTerm|_|) =
+    function
+    | AtomTerm (Atom "0") as term ->
+      Some 0
+    | AppTerm (Atom "次", NaturalTerm n) ->
+      Some (n + 1)
+    | _ ->
+      None
+
   let rec printTerm term =
     match term with
     | VarTerm v ->
       quote v.Name
+    | NaturalTerm n ->
+      sprintf "%d" n
     | AppTerm (a, term) ->
       sprintf "%s の %s" (printTerm term) (quote a.Name)
     | AtomTerm a ->

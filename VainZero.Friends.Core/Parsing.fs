@@ -1,5 +1,6 @@
 ﻿namespace VainZero.Friends.Core
 
+open System
 open Basis.Core
 open FParsec
 
@@ -58,8 +59,29 @@ module Parsing =
         return AtomTerm (Atom name)
       }
 
+    let naturalTermParser =
+      let succ = Atom "次"
+      parse {
+        let! digits = many1Chars digit
+        do! notFollowedBy termParser
+        match Int32.TryParse(digits) with
+        | (true, n) ->
+          if n < 0 then
+            failwith "never"
+          else
+            let rec loop i =
+              if i = 0 then
+                AtomTerm (Atom "0")
+              else
+                AppTerm (succ, loop (i - 1))
+            return loop n
+        | (false, _) ->
+          return! fail "Too large numeric literal."
+      }
+
     let atomicTermParser =
       attempt varTermParser
+      <|> attempt naturalTermParser
       <|> atomTermParser
 
     let appTermParser =
