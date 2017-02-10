@@ -74,8 +74,12 @@ module Parsing =
           return! fail "Too large numeric literal."
       }
 
+    let quotedTermParser =
+      between (skipChar '「' >>. spaces) (spaces >>. skipChar '」') termParser
+
     let atomicTermParser =
       attempt naturalTermParser
+      <|> attempt quotedTermParser
       <|> atomOrVarTermParser
 
     let appTermParser =

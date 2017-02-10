@@ -61,6 +61,14 @@ module ``test Parsing`` =
         ( "0 と サーバル と だれ とか"
         , Term.listWithTailFromSeq dare [Term.zero; serval]
         )
+      case
+        ( "「サーバル の みみ」"
+        , serval |> app "みみ"
+        )
+      case
+        ( "「サーバル と かばんちゃん」の みみ"
+        , listTerm [serval; kabanChan] |> app "みみ"
+        )
       run body
     }
 
