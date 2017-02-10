@@ -121,29 +121,29 @@ module Parsing =
     termParserRef :=
       listTermParser
 
-    let axiomRuleParser =
+    let atomicPropositionParser =
       parse {
         let! term = termParser
         do! spaces1 >>. hagamoParser >>. spaces1
         let! predicateName = identifierParser
-        do! spaces1 >>. skipString "フレンズ" >>. spaces >>. skipString "なんだね！"
-        let prop = Proposition.Create(Predicate predicateName, term)
+        do! spaces1 >>. skipString "フレンズ"
+        return Proposition.Create(Predicate predicateName, term)
+      }
+
+    let axiomRuleParser =
+      parse {
+        let! prop = atomicPropositionParser
+        do! spaces >>. skipString "なんだね！"
         return AxiomRule prop
       }
 
     let inferRuleParser =
       parse {
-        let! bodyTerm = termParser
-        do! spaces1 >>. hagamoParser >>. spaces1
-        let! bodyPredicateName = identifierParser
-        do! spaces1 >>. skipString "フレンズ" >>. spaces >>. skipString "なら" >>. spaces1
-        let! headTerm = termParser
-        do! spaces1 >>. hagamoParser >>. spaces1
-        let! headPredicateName = identifierParser
-        do! spaces1 >>. skipString "フレンズ" >>. spaces >>. skipString "なんだね！"
-        let head = Proposition.Create(Predicate headPredicateName, headTerm)
-        let body = Proposition.Create(Predicate bodyPredicateName, bodyTerm)
-        return InferRule (head, body)
+        let! bodyProp = atomicPropositionParser
+        do! spaces >>. skipString "なら" >>. spaces1
+        let! headProp = atomicPropositionParser
+        do! spaces >>. skipString "なんだね！"
+        return InferRule (headProp, bodyProp)
       }
 
     let ruleParser =
