@@ -75,11 +75,11 @@ module Program =
 
   let rec run () =
     printf "> "
-    match Console.ReadLine() with
-    | null ->
-      ()
-    | line ->
-      read (line |> String.trimEnd [|' '|])
+    let line = Console.ReadLine()
+    if line |> isNull |> not then
+      let line = line |> String.trimEnd [|' '|]
+      if line |> String.isEmpty |> not then
+        read (line |> String.trimEnd [|' '|])
       run ()
 
   [<EntryPoint>]
