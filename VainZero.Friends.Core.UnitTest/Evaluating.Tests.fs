@@ -33,6 +33,7 @@ module ``test Term`` =
 module ``test Environment`` =
   let x = VarTerm (Variable.Create("X"))
   let y = VarTerm (Variable.Create("Y"))
+  let z = VarTerm (Variable.Create("Z"))
   let socrates = AtomTerm (Atom "socrates")
   let plato = AtomTerm (Atom "plato")
   let listTerm = Term.listFromSeq
@@ -72,6 +73,27 @@ module ``test Environment`` =
         ( listTerm [x; y]
         , listTerm [socrates; plato]
         , x, socrates
+        )
+      // Lists with tail term match lists.
+      case
+        ( Term.listWithTailFromSeq x []
+        , listTerm []
+        , x, listTerm []
+        )
+      case
+        ( Term.listWithTailFromSeq x []
+        , listTerm [socrates; plato]
+        , x, (listTerm [socrates; plato])
+        )
+      case
+        ( Term.listWithTailFromSeq x [y; z]
+        , listTerm [socrates; plato]
+        , x, (listTerm [])
+        )
+      case
+        ( Term.listWithTailFromSeq x [z]
+        , Term.listWithTailFromSeq y [socrates; plato]
+        , x, (Term.listWithTailFromSeq y [plato])
         )
       run body
     }
