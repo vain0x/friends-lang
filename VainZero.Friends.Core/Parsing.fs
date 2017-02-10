@@ -14,15 +14,14 @@ module Parsing =
 
     [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
     module BinaryTree =
-      let rec toSeq tree =
-        seq {
-          match tree with
-          | Leaf x ->
-            yield x
-          | Node (l, r) ->
-            yield! toSeq l
-            yield! toSeq r
-        }
+      let rec toNonemptyList =
+        function
+        | Leaf x ->
+          (x, [])
+        | Node (l, r) ->
+          let (lh, lt) = l |> toNonemptyList
+          let (rh, rt) = r |> toNonemptyList
+          (lh, List.append lt (rh :: rt))
 
     type Parser<'x> = Parser<'x, unit>
 
@@ -31,7 +30,7 @@ module Parsing =
         let separatorParser =
           attempt (op |>> (fun () l r -> Node(l, r)))
         let! tree = chainl1 (p |>> Leaf) separatorParser
-        return tree |> BinaryTree.toSeq |> Seq.toList
+        return tree |> BinaryTree.toNonemptyList
       }
 
     let hagamoParser: Parser<unit> =
@@ -80,34 +79,30 @@ module Parsing =
     let appTermParser =
       parse {
         let separatorParser = spaces1 >>. skipChar 'の' >>. spaces1
-        let! terms = list1Parser atomicTermParser separatorParser
-        match terms with
-        | [] -> failwith "never"
-        | term :: terms ->
-          let rec functors terms =
-            parse {
-              match terms with
-              | [] ->
-                return []
-              | (AtomTerm atom :: terms) ->
-                let! tail = functors terms
-                return atom :: tail
-              | _ ->
-                return! fail "Functor must be an atom."
-            }
-          let! atoms = functors terms
-          return atoms |> Seq.fold (fun term atom -> AppTerm (atom, term)) term
+        let! (term, terms) = list1Parser atomicTermParser separatorParser
+        let rec functors terms =
+          parse {
+            match terms with
+            | [] ->
+              return []
+            | (AtomTerm atom :: terms) ->
+              let! tail = functors terms
+              return atom :: tail
+            | _ ->
+              return! fail "Functor must be an atom."
+          }
+        let! atoms = functors terms
+        return atoms |> Seq.fold (fun term atom -> AppTerm (atom, term)) term
       }
 
     let listTermParser =
       parse {
         let separatorParser = spaces1 >>. skipChar 'と' >>. spaces1
-        let! terms = list1Parser appTermParser separatorParser
-        match terms with
-        | [term] ->
-          return term
-        | terms ->
-          return ListTerm terms
+        let! (term, terms) = list1Parser appTermParser separatorParser
+        return
+          if terms |> List.isEmpty
+          then term
+          else ListTerm (term :: terms)
       }
 
     termParserRef :=
