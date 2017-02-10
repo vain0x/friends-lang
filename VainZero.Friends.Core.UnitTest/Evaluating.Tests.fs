@@ -59,7 +59,7 @@ module ``test Environment`` =
         ( x, y
         , x, y
         )
-      // Variables match any terms.
+      // Unbound variables match any terms.
       case
         ( x, socrates
         , x, socrates
@@ -67,6 +67,12 @@ module ``test Environment`` =
       case
         ( x, listTerm [socrates; plato]
         , x, listTerm [socrates; plato]
+        )
+      // Bound variables match bound terms.
+      case
+        ( listTerm [x; Term.succ x]
+        , listTerm [Term.zero; y]
+        , y, Term.succ Term.zero
         )
       // Each list term matches the list term with the same content.
       case

@@ -184,12 +184,18 @@ type Environment(map: Map<Variable, Term>) =
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Environment =
-  let rec tryUnify term term' env =
+  let rec tryUnify term term' (env: Environment) =
+    let tryUnifyVar var term (env: Environment) =
+      match env.TryFind(var) with
+      | Some term' ->
+        env |> tryUnify term (env.Substitute(term'))
+      | None ->
+        env.Add(var, term) |> Some
     match (term, term') with
     | (VarTerm var, _) ->
-      (env: Environment).Add(var, term') |> Some
+      env |> tryUnifyVar var term'
     | (_, VarTerm var') ->
-      env.Add(var', term) |> Some
+      env |> tryUnifyVar var' term
     | (AtomTerm atom, AtomTerm atom')
       when atom = atom' ->
       Some env
