@@ -79,7 +79,7 @@ module Program =
     | null ->
       ()
     | line ->
-      read line
+      read (line |> String.trimEnd [|' '|])
       run ()
 
   [<EntryPoint>]
