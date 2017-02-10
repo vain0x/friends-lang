@@ -44,7 +44,7 @@ module ``test Environment`` =
         match Environment.Empty |> Environment.tryUnify term term' with
         | Some env ->
           do! assertEquals (env.Substitute(term)) (env.Substitute(term'))
-          do! env.Substitute(x) |> assertEquals expected
+          do! env.Substitute(testTerm) |> assertEquals expected
         | None ->
           return! fail "Unification failed."
       }
