@@ -124,7 +124,7 @@ module ``test Knowledge `` =
   let mortal = Predicate "mortal"
   let x = VarTerm (Variable.Create "X")
   let y = VarTerm (Variable.Create "Y")
-  
+
   let socrates = AtomTerm (Atom "socrates")
   let plato = AtomTerm (Atom "plato")
   
@@ -205,6 +205,7 @@ module ``test Knowledge `` =
     let zero = AtomTerm (Atom "0")
     let app f t = AppTerm (Atom f, t)
     let succ t = AppTerm (Atom "次", t)
+    let listTerm = Term.listFromSeq
     let andProp props = AndProposition (Vector.ofSeq props)
 
     let fizzAtom = AtomTerm (Atom "Fizz")
@@ -218,6 +219,10 @@ module ``test Knowledge `` =
     let multiple3 = Predicate "multiple-3"
     let multiple5 = Predicate "multiple-5"
     let multiple15 = Predicate "multiple-15"
+    let lessThan l r = (Predicate "lessThan").[listTerm [l; r]]
+    let between x l r = (Predicate "between").[listTerm [x; l; r]]
+    let l = VarTerm (Variable.Create "L")
+    let r = VarTerm (Variable.Create "R")
 
     let knowledge =
       [|
@@ -261,6 +266,22 @@ module ``test Knowledge `` =
           ( fizzBuzzProposition x x
           , AtomicProposition natural.[x]
           )
+        // lessThan
+        AxiomRule (lessThan (Term.zero) (Term.succ y))
+        InferRule
+          ( lessThan (Term.succ x) (Term.succ y)
+          , AtomicProposition (lessThan x y)
+          )
+        // between
+        InferRule
+          ( between l l r
+          , AtomicProposition (lessThan l r)
+          )
+        InferRule
+          ( between x l r
+          , andProp
+              ([(lessThan l r); (between x (Term.succ l) r)] |> List.map AtomicProposition)
+          )
       |]
       |> fun rules -> Knowledge.FromRules(rules)
 
@@ -295,6 +316,23 @@ module ``test Knowledge `` =
           prove (AtomicProposition (fizzBuzzProposition n n))
           |> Seq.length
           |> assertEquals 1
+        do!
+          prove (AtomicProposition (lessThan Term.zero Term.zero))
+          |> Seq.length
+          |> assertEquals 0
+        do!
+          prove (AtomicProposition (lessThan Term.zero (Term.ofNatural 1)))
+          |> Seq.length
+          |> assertEquals 1
+        do!
+          prove (AtomicProposition (lessThan (Term.ofNatural 3) (Term.ofNatural 5)))
+          |> Seq.length
+          |> assertEquals 1
+        do!
+          prove (AtomicProposition (between x Term.zero (Term.ofNatural 3)))
+          |> Seq.map (fun env -> env.Substitute(x))
+          |> Seq.toArray
+          |> assertEquals [|for i in 0..2 -> Term.ofNatural i|]
       }
 
     let ``test query`` =
@@ -306,4 +344,23 @@ module ``test Knowledge `` =
           query (AtomicProposition (fizzBuzzProposition (Term.ofNatural 3) x))
           |> Seq.toArray
           |> assertEquals [|[|("X", fizzAtom)|]|]
+        do!
+          let n = 16
+          let prop =
+            andProp
+              [
+                AtomicProposition (between x Term.zero (Term.ofNatural n))
+                AtomicProposition (fizzBuzzProposition x y)
+              ]
+          query prop
+          |>  Seq.toArray
+          |> assertEquals
+            [|for i in 0..(n - 1) ->
+                let y =
+                  if i % 15 = 0 then fizzBuzzAtom
+                  elif i % 3 = 0 then fizzAtom
+                  elif i % 5 = 0 then buzzAtom
+                  else Term.ofNatural i
+                [|("X", Term.ofNatural i); ("Y", y)|]
+            |]
       }
