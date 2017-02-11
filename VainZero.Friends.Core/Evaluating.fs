@@ -217,19 +217,26 @@ module Knowledge =
       ProveFunction(env, knowledge).Prove(prop: Proposition)
 
     member this.Prove(prop: AtomicProposition) =
-      seq {
-        for rule in knowledge.FindAll(prop.Predicate) do
-          let rule = rule |> Rule.refresh
-          let head = rule.Head
-          match env |> Environment.tryUnify prop.Term head.Term with
-          | Some env ->
-            match rule with
-            | AxiomRule _ ->
-              yield env
-            | InferRule (_, body) ->
-              yield! prove body env
-          | None -> ()
-      }
+      let rules =
+        knowledge.FindAll(prop.Predicate)
+        |> Vector.map Rule.refresh
+      let rec loop i =
+        seq {
+          if i < rules.Length then
+            let loop () = loop (i + 1)
+            let rule = rules.[i]
+            let head = rule.Head
+            match env |> Environment.tryUnify prop.Term head.Term with
+            | Some env ->
+              match rule with
+              | AxiomRule _ ->
+                yield env
+              | InferRule (_, body) ->
+                yield! prove body env
+            | None -> ()
+            yield! loop ()
+        }
+      loop 0
 
     member this.Prove(prop: Proposition) =
       match prop with
