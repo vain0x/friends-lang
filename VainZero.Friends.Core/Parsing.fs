@@ -52,7 +52,7 @@ module Parsing =
     let atomOrVarTermParser =
       let predefinedVarNames =
         [|
-          "あなた"; "きみ"; "だれ"
+          "あなた"; "きみ"; "かれ"; "かのじょ"; "だれ"
           "なに"; "あれ"; "これ"; "これら"; "それ"; "それら"
         |]
         |> set
