@@ -33,6 +33,7 @@ module Parsing =
         let! tree = chainl1 (p |>> Leaf) separatorParser
         return tree |> BinaryTree.toNonemptyList
       }
+
     let identifierCharParser =
       letter <|> digit <|> pchar '_'
 
@@ -125,8 +126,17 @@ module Parsing =
       parse {
         let! term = termParser
         do! hagamoParser
+        let! optionalTerms =
+          let joshiParser =
+            notFollowedBy (skipString "フレンズ")
+            >>. identifierParser
+          many (attempt (termParser .>> spaces .>> joshiParser .>> spaces))
         let! predicateName = identifierParser
         do! keywordParser (skipString "フレンズ")
+        let term =
+          if optionalTerms |> List.isEmpty
+          then term
+          else Term.listFromSeq (term :: optionalTerms)
         return (Predicate predicateName).[term]
       }
 

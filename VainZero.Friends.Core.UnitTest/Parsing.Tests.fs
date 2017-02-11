@@ -97,6 +97,16 @@ module ``test Parsing`` =
             , AtomicProposition (human.[kimi])
             )
         )
+      // optional terms
+      case
+        ( "すごーい！ 0 は 1 より 小さい フレンズ なんだね！"
+        , AxiomRule ((Predicate "小さい").[listTerm [Term.zero; Term.ofNatural 1]])
+        )
+      case
+        ( "すごーい！ かばんちゃん は サーバル に 紙飛行機 を あげる フレンズ なんだね！"
+        , let airplane = AtomTerm (Atom "紙飛行機") in
+          AxiomRule ((Predicate "あげる").[listTerm [kabanChan; serval; airplane]])
+        )
       // !
       case
         ( "すごーい！ かばんちゃん は ヒトの フレンズ なんだね！ たーのしー！"
