@@ -14,6 +14,7 @@ module ``test Parsing`` =
 
   let app f t = AppTerm (Atom f, t)
   let listTerm xs = Term.listFromSeq xs
+  let andProp props = AndProposition (Vector.ofSeq props)
 
   let ``test parseTerm can parse terms`` =
     let body (source, expected) =
@@ -117,6 +118,18 @@ module ``test Parsing`` =
         , InferRule
             ( tailless.[kimi]
             , AndProposition (Vector.ofList [AtomicProposition (human.[kimi]); CutProposition])
+            )
+        )
+      // and
+      case
+        ( "すごーい！ きみ が しっぽのない フレンズ で きみ が みみのない フレンズ なら きみ は めずらしい フレンズ なんだね！"
+        , InferRule
+            ( (Predicate "めずらしい").[kimi] 
+            , andProp
+                [
+                  AtomicProposition tailless.[kimi]
+                  AtomicProposition (Predicate "みみのない").[kimi]
+                ]
             )
         )
       run body
