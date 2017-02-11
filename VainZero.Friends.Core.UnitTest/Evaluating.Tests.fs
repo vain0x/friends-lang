@@ -214,25 +214,52 @@ module ``test Knowledge `` =
       Predicate "FizzBuzz"
     let fizzBuzzProposition x y =
       fizzBuzzPredicate.[Term.listFromSeq [x; y]]
+    let natural = Predicate "natural"
     let multiple3 = Predicate "multiple-3"
     let multiple5 = Predicate "multiple-5"
     let multiple15 = Predicate "multiple-15"
 
     let knowledge =
       [|
+        // natural
+        AxiomRule natural.[zero]
+        InferRule
+          ( natural.[succ x]
+          , AtomicProposition natural.[x]
+          )
+        // multiple3
         AxiomRule multiple3.[zero]
         InferRule
           ( multiple3.[x |> succ |> succ |> succ]
           , AtomicProposition multiple3.[x]
           )
+        // multiple5
         AxiomRule multiple5.[zero]
         InferRule
           ( multiple5.[x |> succ |> succ |> succ |> succ |> succ]
           , AtomicProposition multiple5.[x]
           )
+        // multiple15
         InferRule
           ( multiple15.[x]
           , andProp ([multiple3.[x]; multiple5.[x]] |> List.map AtomicProposition)
+          )
+        // fizzBuzz
+        InferRule
+          ( fizzBuzzProposition x fizzBuzzAtom
+          , AtomicProposition multiple15.[x]
+          )
+        InferRule
+          ( fizzBuzzProposition x fizzAtom
+          , AtomicProposition multiple3.[x]
+          )
+        InferRule
+          ( fizzBuzzProposition x buzzAtom
+          , AtomicProposition multiple5.[x]
+          )
+        InferRule
+          ( fizzBuzzProposition x x
+          , AtomicProposition natural.[x]
           )
       |]
       |> fun rules -> Knowledge.FromRules(rules)
@@ -259,4 +286,28 @@ module ``test Knowledge `` =
         do!
           prove (AtomicProposition multiple15.[Term.ofNatural 30]) |> Seq.length
           |> assertEquals 1
+        do!
+          prove (AtomicProposition (fizzBuzzProposition (Term.ofNatural 3) fizzAtom))
+          |> Seq.length
+          |> assertEquals 1
+        do!
+          let n = Term.ofNatural 14
+          prove (AtomicProposition (fizzBuzzProposition n n))
+          |> Seq.length
+          |> assertEquals 1
+      }
+
+    let ``test query`` =
+      test {
+        let query prop =
+          knowledge |> Knowledge.query prop
+          |> Seq.map (fun xs -> xs |> Array.map (fun (var, term) -> (var.Name, term)))
+        do!
+          query (AtomicProposition (fizzBuzzProposition (Term.ofNatural 3) x))
+          |> Seq.toArray
+          |> assertEquals
+            [|
+              [|("X", fizzAtom)|]
+              [|("X", Term.ofNatural 3)|]
+            |]
       }
