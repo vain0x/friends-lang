@@ -97,6 +97,18 @@ module ``test Parsing`` =
             , AtomicProposition (human.[kimi])
             )
         )
+      // !
+      case
+        ( "すごーい！ かばんちゃん は ヒトの フレンズ なんだね！ たーのしー！"
+        , InferRule(human.[kabanChan], CutProposition)
+        )
+      case
+        ( "すごーい！ きみ が ヒトの フレンズ なら きみ は しっぽのない フレンズ なんだね！ たーのしー！"
+        , InferRule
+            ( tailless.[kimi]
+            , AndProposition (Vector.ofList [AtomicProposition (human.[kimi]); CutProposition])
+            )
+        )
       run body
     }
 

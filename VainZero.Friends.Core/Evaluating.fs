@@ -95,6 +95,8 @@ module AtomicProposition =
 module Proposition =
   let rec variables =
     function
+    | CutProposition ->
+      Seq.empty
     | AtomicProposition prop ->
       prop.Term |> Term.variables
     | AndProposition props ->
@@ -102,6 +104,8 @@ module Proposition =
 
   let rec replaceId id =
     function
+    | CutProposition ->
+      CutProposition
     | AtomicProposition prop ->
       AtomicProposition (prop |> AtomicProposition.replaceId id)
     | AndProposition props ->
@@ -212,6 +216,18 @@ module Environment =
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Knowledge =
+  type private BacktrackFlow =
+    | Break
+    | Continue
+  with
+    member this.Combine(r) =
+      match (this, r) with
+      | (Break, _)
+      | (_, Break) ->
+        Break
+      | (Continue, Continue) ->
+        Continue
+
   type private ProveFunction(env: Environment, knowledge: Knowledge) =
     let prove prop env =
       ProveFunction(env, knowledge).Prove(prop: Proposition)
@@ -230,25 +246,42 @@ module Knowledge =
             | Some env ->
               match rule with
               | AxiomRule _ ->
-                yield env
+                yield (env, Continue)
+                yield! loop ()
               | InferRule (_, body) ->
-                yield! prove body env
-            | None -> ()
-            yield! loop ()
+                let (envs, flow) =
+                  prove body env |> Seq.fold
+                    (fun (envs, flow) (env', flow') ->
+                      (env' :: envs, (flow: BacktrackFlow).Combine(flow'))
+                    )
+                    ([], Continue)
+                yield! envs |> Seq.map (fun env -> (env, Continue)) |> Seq.rev
+                if flow = Continue then
+                  yield! loop ()
+            | None ->
+              yield! loop ()
         }
       loop 0
 
     member this.Prove(prop: Proposition) =
       match prop with
+      | CutProposition ->
+        Seq.singleton (env, Break)
       | AtomicProposition prop ->
         this.Prove(prop)
       | AndProposition props ->
         props |> Vector.fold
-          (fun envs prop -> envs |> Seq.collect (prove prop))
-          (Seq.singleton env)
+          (fun envs prop ->
+            envs |> Seq.collect
+              (fun (env, flow) ->
+                prove prop env
+                |> Seq.map (fun (env', flow') -> (env', flow.Combine(flow')))
+              )
+          )
+          (Seq.singleton (env, Continue))
 
   let prove (prop: Proposition) (env: Environment) (knowledge: Knowledge) =
-    ProveFunction(env, knowledge).Prove(prop)
+    ProveFunction(env, knowledge).Prove(prop) |> Seq.map fst
 
   let query prop knowledge =
     seq {

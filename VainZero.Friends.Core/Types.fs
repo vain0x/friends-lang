@@ -62,10 +62,22 @@ with
     }
 
 type Proposition =
+  | CutProposition
   | AtomicProposition
     of AtomicProposition
   | AndProposition
     of vector<Proposition>
+with
+  member this.And(r) =
+    match (this, r) with
+    | (AndProposition l, AndProposition r) ->
+      AndProposition (Vector.append l r)
+    | (AndProposition l, r) ->
+      AndProposition (Vector.append l (Vector.singleton r))
+    | (l, AndProposition r) ->
+      AndProposition (Vector.append (Vector.singleton l) r)
+    | (l, r) ->
+      AndProposition (Vector.ofList [l; r])
 
 type Rule =
   | AxiomRule

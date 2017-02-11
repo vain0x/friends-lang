@@ -247,15 +247,15 @@ module ``test Knowledge `` =
         // fizzBuzz
         InferRule
           ( fizzBuzzProposition x fizzBuzzAtom
-          , AtomicProposition multiple15.[x]
+          , andProp [AtomicProposition multiple15.[x]; CutProposition]
           )
         InferRule
           ( fizzBuzzProposition x fizzAtom
-          , AtomicProposition multiple3.[x]
+          , andProp [AtomicProposition multiple3.[x]; CutProposition]
           )
         InferRule
           ( fizzBuzzProposition x buzzAtom
-          , AtomicProposition multiple5.[x]
+          , andProp [AtomicProposition multiple5.[x]; CutProposition]
           )
         InferRule
           ( fizzBuzzProposition x x
@@ -305,9 +305,5 @@ module ``test Knowledge `` =
         do!
           query (AtomicProposition (fizzBuzzProposition (Term.ofNatural 3) x))
           |> Seq.toArray
-          |> assertEquals
-            [|
-              [|("X", fizzAtom)|]
-              [|("X", Term.ofNatural 3)|]
-            |]
+          |> assertEquals [|[|("X", fizzAtom)|]|]
       }

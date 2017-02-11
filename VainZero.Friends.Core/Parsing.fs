@@ -149,11 +149,18 @@ module Parsing =
     let propositionParser =
       andPropositionParser
 
+    let cutParser =
+      skipString "たーのしー！" |> keywordParser |> opt |>> Option.isSome
+
     let axiomRuleParser =
       parse {
         let! prop = atomicPropositionParser
         do! keywordParser (skipString "なんだね！")
-        return AxiomRule prop
+        let! existsCut = cutParser
+        return
+          if existsCut
+          then InferRule (prop, CutProposition)
+          else AxiomRule prop
       }
 
     let inferRuleParser =
@@ -162,6 +169,8 @@ module Parsing =
         do! keywordParser (skipString "なら")
         let! headProp = atomicPropositionParser
         do! keywordParser (skipString "なんだね！")
+        let! existsCut = cutParser
+        let bodyProp = if existsCut then bodyProp.And(CutProposition) else bodyProp
         return InferRule (headProp, bodyProp)
       }
 
