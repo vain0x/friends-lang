@@ -215,16 +215,11 @@ module Environment =
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Knowledge =
-  let prove (prop: Proposition) (env: Environment) (knowledge: Knowledge) =
-    let rec prove prop env =
-      match prop with
-      | AtomicProposition prop ->
-        proveAtomicProposition prop env knowledge
-      | AndProposition props ->
-        props |> Vector.fold
-          (fun envs prop -> envs |> Seq.collect (prove prop))
-          (Seq.singleton env)
-    and proveAtomicProposition (prop: AtomicProposition) env knowledge =
+  type private ProveFunction(env: Environment, knowledge: Knowledge) =
+    let prove prop env =
+      ProveFunction(env, knowledge).Prove(prop: Proposition)
+
+    member this.Prove(prop: AtomicProposition) =
       seq {
         for rule in knowledge.FindAll(prop.Predicate) do
           let rule = rule |> Rule.refresh
@@ -238,7 +233,18 @@ module Knowledge =
               yield! prove body env
           | None -> ()
       }
-    prove prop env
+
+    member this.Prove(prop: Proposition) =
+      match prop with
+      | AtomicProposition prop ->
+        this.Prove(prop)
+      | AndProposition props ->
+        props |> Vector.fold
+          (fun envs prop -> envs |> Seq.collect (prove prop))
+          (Seq.singleton env)
+
+  let prove (prop: Proposition) (env: Environment) (knowledge: Knowledge) =
+    ProveFunction(env, knowledge).Prove(prop)
 
   let query prop knowledge =
     seq {
