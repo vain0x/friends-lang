@@ -341,6 +341,12 @@ module ``test Knowledge `` =
           knowledge |> Knowledge.query prop
           |> Seq.map (fun xs -> xs |> Array.map (fun (var, term) -> (var.Name, term)))
         do!
+          query (AtomicProposition (multiple3.[x]))
+          |> Seq.take 3
+          |> Seq.collect (Seq.map snd)
+          |> Seq.toArray
+          |> assertEquals [|Term.zero; Term.ofNatural 3; Term.ofNatural 6|]
+        do!
           query (AtomicProposition (fizzBuzzProposition (Term.ofNatural 3) x))
           |> Seq.toArray
           |> assertEquals [|[|("X", fizzAtom)|]|]

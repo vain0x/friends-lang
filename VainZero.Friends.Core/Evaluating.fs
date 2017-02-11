@@ -249,13 +249,10 @@ module Knowledge =
                 yield (env, Continue)
                 yield! loop ()
               | InferRule (_, body) ->
-                let (envs, flow) =
-                  prove body env |> Seq.fold
-                    (fun (envs, flow) (env', flow') ->
-                      (env' :: envs, (flow: BacktrackFlow).Combine(flow'))
-                    )
-                    ([], Continue)
-                yield! envs |> Seq.map (fun env -> (env, Continue)) |> Seq.rev
+                let mutable flow = Continue
+                for (env, flow') in prove body env do
+                  yield (env, Continue)
+                  flow <- flow.Combine(flow')
                 if flow = Continue then
                   yield! loop ()
             | None ->
