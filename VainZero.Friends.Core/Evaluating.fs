@@ -1,6 +1,7 @@
 ﻿namespace VainZero.Friends.Core
 
 open System.Collections.Generic
+open Basis.Core
 open ExtCore.Collections
 open VainZero
 
@@ -123,11 +124,7 @@ module Rule =
 
 type Knowledge(map: HashMap<Predicate, vector<Rule>>) =
   member this.FindAll(predicate) =
-    match map.TryFind(predicate) with
-    | Some rules ->
-      rules :> seq<_>
-    | None ->
-      Seq.empty
+    map.TryFind(predicate) |> Option.getOr Vector.empty
 
   member this.Add(rule) =
     let predicate = (rule: Rule).Predicate
