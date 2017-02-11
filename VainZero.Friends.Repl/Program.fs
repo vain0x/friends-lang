@@ -1,6 +1,7 @@
 ﻿namespace VainZero.Friends.Repl
 
 open System
+open System.Text
 open Basis.Core
 open VainZero.Friends.Core
 
@@ -16,6 +17,7 @@ module Console =
 
 module Program =
   let mutable knowledge = Knowledge.Empty
+  let mutable buffer = StringBuilder()
 
   let quote s =
     sprintf "「%s」" s
@@ -69,23 +71,28 @@ module Program =
     walk ()
 
   let read line =
-    match Parsing.parseStatement line with
-    | Success statement ->
-      match statement with
-      | Rule rule ->
-        knowledge <- knowledge.Add(rule)
-      | Query prop ->
-        query prop
-    | Failure message ->
-      eprintfn "%s" message
+    if buffer.Length > 0 || line |> String.isEmpty |> not then
+      buffer.AppendLine(line) |> ignore
+      let source = string buffer
+      match Parsing.parseStatement source with
+      | Success statement ->
+        match statement with
+        | Rule rule ->
+          knowledge <- knowledge.Add(rule)
+        | Query prop ->
+          query prop
+        buffer.Clear() |> ignore
+      | Failure message ->
+        if line |> String.isEmpty then
+          eprintfn "%s" message
+          buffer.Clear() |> ignore
 
   let rec run () =
-    printf "> "
+    printf "%s" (if buffer.Length = 0 then "> " else "| ")
     let line = Console.ReadLine()
     if line |> isNull |> not then
       let line = line |> String.trimEnd [|' '|]
-      if line |> String.isEmpty |> not then
-        read (line |> String.trimEnd [|' '|])
+      read (line |> String.trimEnd [|' '|])
       run ()
 
   [<EntryPoint>]
