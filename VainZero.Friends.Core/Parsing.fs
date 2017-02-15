@@ -164,8 +164,12 @@ module Parsing =
 
     let axiomRuleParser =
       parse {
-        let! prop = atomicPropositionParser
-        do! keywordParser (skipString "なんだね！")
+        let! prop =
+          parse {
+            let! prop = atomicPropositionParser
+            do! keywordParser (skipString "なんだね！")
+            return prop
+          } |> attempt
         let! existsCut = cutParser
         return
           if existsCut
@@ -175,8 +179,12 @@ module Parsing =
 
     let inferRuleParser =
       parse {
-        let! bodyProp = propositionParser
-        do! keywordParser (skipString "なら")
+        let! bodyProp =
+          parse {
+            let! bodyProp = propositionParser
+            do! keywordParser (skipString "なら")
+            return bodyProp
+          } |> attempt
         let! headProp = atomicPropositionParser
         do! keywordParser (skipString "なんだね！")
         let! existsCut = cutParser
@@ -187,7 +195,7 @@ module Parsing =
     let ruleParser =
       parse {
         do! keywordParser (skipString "すごーい！") |> attempt
-        return! attempt axiomRuleParser <|> inferRuleParser
+        return! axiomRuleParser <|> inferRuleParser
       }
 
     let queryParser =
