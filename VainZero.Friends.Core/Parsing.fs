@@ -186,7 +186,7 @@ module Parsing =
 
     let ruleParser =
       parse {
-        do! keywordParser (skipString "すごーい！")
+        do! keywordParser (skipString "すごーい！") |> attempt
         return! attempt axiomRuleParser <|> inferRuleParser
       }
 
@@ -198,7 +198,7 @@ module Parsing =
       }
 
     let statementParser =
-      attempt (ruleParser |>> Rule)
+      (ruleParser |>> Rule)
       <|> queryParser
 
     let inputParser =
