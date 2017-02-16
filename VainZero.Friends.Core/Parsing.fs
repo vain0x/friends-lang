@@ -74,13 +74,20 @@ module Parsing =
         | (false, _) ->
           return! fail "Too large numeric literal."
       }
+      |> attempt
 
     let quotedTermParser =
-      between (skipChar '「' >>. spaces) (spaces >>. skipChar '」') termParser
+      parse {
+        do! skipChar '「' |> attempt
+        do! spaces
+        let! term = termParser
+        do! spaces >>. skipChar '」'
+        return term
+      }
 
     let atomicTermParser =
-      attempt naturalTermParser
-      <|> attempt quotedTermParser
+      naturalTermParser
+      <|> quotedTermParser
       <|> atomOrVarTermParser
 
     let appTermParser =
@@ -164,8 +171,12 @@ module Parsing =
 
     let axiomRuleParser =
       parse {
-        let! prop = atomicPropositionParser
-        do! keywordParser (skipString "なんだね！")
+        let! prop =
+          parse {
+            let! prop = atomicPropositionParser
+            do! keywordParser (skipString "なんだね！")
+            return prop
+          } |> attempt
         let! existsCut = cutParser
         return
           if existsCut
@@ -175,8 +186,12 @@ module Parsing =
 
     let inferRuleParser =
       parse {
-        let! bodyProp = propositionParser
-        do! keywordParser (skipString "なら")
+        let! bodyProp =
+          parse {
+            let! bodyProp = propositionParser
+            do! keywordParser (skipString "なら")
+            return bodyProp
+          } |> attempt
         let! headProp = atomicPropositionParser
         do! keywordParser (skipString "なんだね！")
         let! existsCut = cutParser
@@ -186,8 +201,8 @@ module Parsing =
 
     let ruleParser =
       parse {
-        do! keywordParser (skipString "すごーい！")
-        return! attempt axiomRuleParser <|> inferRuleParser
+        do! keywordParser (skipString "すごーい！") |> attempt
+        return! axiomRuleParser <|> inferRuleParser
       }
 
     let queryParser =
@@ -198,7 +213,7 @@ module Parsing =
       }
 
     let statementParser =
-      attempt (ruleParser |>> Rule)
+      (ruleParser |>> Rule)
       <|> queryParser
 
     let inputParser =
