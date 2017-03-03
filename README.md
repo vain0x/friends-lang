@@ -9,7 +9,7 @@
 ```
 $ git clone git@github.com:vain0/VainZero.Friends.git
 $ docker build -t friends-lang ./VainZero.Friends
-$ docker run -it friends friends
+$ docker run -it friends-lang friends
 ようこそジャパリパークへ！
 >
 ```
