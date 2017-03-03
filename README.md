@@ -4,6 +4,16 @@
 - [ダウンロード](https://github.com/vain0/VainZero.Friends/releases/latest)
 - [すごーい！ きみはプログラミング言語を実装できるフレンズなんだね - Qiita](http://qiita.com/vain0/items/6d3b75f667d3ec7f1d2a)
 
+## Getting started
+### Use docker
+```
+$ git clone git@github.com:vain0/VainZero.Friends.git
+$ docker build -t friends-lang ./VainZero.Friends
+$ docker run -it friends friends
+ようこそジャパリパークへ！
+>
+```
+
 ## 文法
 ### すごーい！ 文
 すごーい！ 文では、事実を述べることができる。
