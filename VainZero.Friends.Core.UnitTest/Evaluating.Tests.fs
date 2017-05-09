@@ -370,3 +370,40 @@ module ``test Knowledge `` =
                 [|("X", Term.ofNatural i); ("Y", y)|]
             |]
       }
+
+  module ``test arithmetic`` =
+    let zero = AtomTerm (Atom "0")
+    let app f t = AppTerm (Atom f, t)
+    let succ t = AppTerm (Atom "次", t)
+    let listTerm = Term.listFromSeq
+    let pairTerm x y = listTerm [|x; y|]
+    let andProp props = AndProposition (Vector.ofSeq props)
+
+    let x = VarTerm (Variable.Create "X")
+    let y = VarTerm (Variable.Create "Y")
+    let z = VarTerm (Variable.Create "Z")
+
+    let equal = Predicate "equal"
+    let add x y = app "add" (listTerm [|x; y|])
+
+    let knowledge =
+      [|
+        // add
+        AxiomRule equal.[pairTerm (add x zero) x]
+        InferRule
+          ( equal.[pairTerm (add x (succ y)) (succ z)]
+          , AtomicProposition equal.[pairTerm (add x y) z]
+          )
+      |]
+      |> fun rules -> Knowledge.FromRules(rules)
+
+    let ``test query equal(add)`` =
+      test {
+        let query prop =
+          knowledge |> Knowledge.query prop
+          |> Seq.map (fun xs -> xs |> Array.map (fun (var, term) -> (var.Name, term)))
+        do!
+          query (AtomicProposition (equal.[pairTerm (add (Term.ofNatural 1) (Term.ofNatural 2)) z]))
+          |> Seq.toArray
+          |> assertEquals [|[|("Z", Term.ofNatural 3)|]|]
+        }
