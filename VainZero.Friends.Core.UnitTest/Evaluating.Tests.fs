@@ -387,6 +387,7 @@ module ``test Knowledge `` =
 
     let equal = Predicate "equal"
     let add x y = app "add" (listTerm [|x; y|])
+    let subtract x y = app "subtract" (pairTerm x y)
 
     let knowledge =
       [|
@@ -395,6 +396,11 @@ module ``test Knowledge `` =
         InferRule
           ( equal.[pairTerm (add x (succ y)) (succ z)]
           , AtomicProposition equal.[pairTerm (add x y) z]
+          )
+        // subtract
+        InferRule
+          ( equal.[pairTerm (subtract x y) z]
+          , AtomicProposition equal.[pairTerm (add z y) x]
           )
       |]
       |> fun rules -> Knowledge.FromRules(rules)
@@ -446,4 +452,20 @@ module ``test Knowledge `` =
                   ("Z", Term.ofNatural (i + 1))
                 |]
             |]
+      }
+
+    let ``test query equal(subtract)`` =
+      test {
+        // 3 - 1 = z
+        do!
+          let equation = equal.[pairTerm (subtract (Term.ofNatural 3) (Term.ofNatural 1)) z] in
+          query (AtomicProposition equation)
+          |> Seq.toArray
+          |> assertEquals [|[|("Z", Term.ofNatural 2)|]|]
+        // 1 - 3 = z (No solution)
+        do!
+          let equation = equal.[pairTerm (subtract (Term.ofNatural 1) (Term.ofNatural 3)) z] in
+          query (AtomicProposition equation)
+          |> Seq.toArray
+          |> assertEquals [||]
       }
