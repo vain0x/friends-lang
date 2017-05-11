@@ -120,6 +120,10 @@ module ``test Environment`` =
     }
 
 module ``test Knowledge `` =
+  let query prop knowledge =
+    knowledge |> Knowledge.query prop
+    |> Seq.map (fun xs -> xs |> Array.map (fun (var, term) -> (var.Name, term)))
+
   let human = Predicate "human"
   let mortal = Predicate "mortal"
   let x = VarTerm (Variable.Create "X")
@@ -337,9 +341,7 @@ module ``test Knowledge `` =
 
     let ``test query`` =
       test {
-        let query prop =
-          knowledge |> Knowledge.query prop
-          |> Seq.map (fun xs -> xs |> Array.map (fun (var, term) -> (var.Name, term)))
+        let query prop = knowledge |> query prop
         do!
           query (AtomicProposition (multiple3.[x]))
           |> Seq.take 3
@@ -369,4 +371,101 @@ module ``test Knowledge `` =
                   else Term.ofNatural i
                 [|("X", Term.ofNatural i); ("Y", y)|]
             |]
+      }
+
+  module ``test arithmetic`` =
+    let zero = AtomTerm (Atom "0")
+    let app f t = AppTerm (Atom f, t)
+    let succ t = AppTerm (Atom "次", t)
+    let listTerm = Term.listFromSeq
+    let pairTerm x y = listTerm [|x; y|]
+    let andProp props = AndProposition (Vector.ofSeq props)
+
+    let x = VarTerm (Variable.Create "X")
+    let y = VarTerm (Variable.Create "Y")
+    let z = VarTerm (Variable.Create "Z")
+
+    let equal = Predicate "equal"
+    let add x y = app "add" (listTerm [|x; y|])
+    let subtract x y = app "subtract" (pairTerm x y)
+
+    let knowledge =
+      [|
+        // add
+        AxiomRule equal.[pairTerm (add x zero) x]
+        InferRule
+          ( equal.[pairTerm (add x (succ y)) (succ z)]
+          , AtomicProposition equal.[pairTerm (add x y) z]
+          )
+        // subtract
+        InferRule
+          ( equal.[pairTerm (subtract x y) z]
+          , AtomicProposition equal.[pairTerm (add z y) x]
+          )
+      |]
+      |> fun rules -> Knowledge.FromRules(rules)
+
+    let query prop =
+      knowledge |> query prop
+
+    let ``test query equal(add)`` =
+      test {
+        do!
+          // 1 + 2 = z
+          let equation = equal.[pairTerm (add (Term.ofNatural 1) (Term.ofNatural 2)) z] in
+          query (AtomicProposition equation)
+          |> Seq.toArray
+          |> assertEquals [|[|("Z", Term.ofNatural 3)|]|]
+        do!
+          // 1 + y = 3
+          let equation = equal.[pairTerm (add (Term.ofNatural 1) y) (Term.ofNatural 3)] in
+          query (AtomicProposition equation)
+          |> Seq.toArray
+          |> assertEquals [|[|("Y", Term.ofNatural 2)|]|]
+      }
+
+    let ``test query equal(add) nondeterminism`` =
+      test {
+        do!
+          // x + y = 3
+          query (AtomicProposition (equal.[pairTerm (add x y) (Term.ofNatural 3)]))
+          |> Seq.toArray
+          |> assertEquals
+            [|
+              for i in 0..3 ->
+                [|
+                  ("X", Term.ofNatural (3 - i))
+                  ("Y", Term.ofNatural i)
+                |]
+            |]
+        do!
+          // 1 + y = z
+          let n = 5 in
+          query (AtomicProposition (equal.[pairTerm (add (Term.ofNatural 1) y) z]))
+          |> Seq.take n
+          |> Seq.toArray
+          |> assertEquals
+            [|
+              for i in 0..(n - 1) ->
+                [|
+                  ("Y", Term.ofNatural i)
+                  ("Z", Term.ofNatural (i + 1))
+                |]
+            |]
+      }
+
+    let ``test query equal(subtract)`` =
+      test {
+        // 3 - 1 = z
+        do!
+          let equation = equal.[pairTerm (subtract (Term.ofNatural 3) (Term.ofNatural 1)) z] in
+          query (AtomicProposition equation)
+          |> Seq.toArray
+          |> assertEquals [|[|("Z", Term.ofNatural 2)|]|]
+        // 1 - 3 = z (No solution)
+        do!
+          let equation = equal.[pairTerm (subtract (Term.ofNatural 1) (Term.ofNatural 3)) z] in
+          query (AtomicProposition equation)
+          |> Seq.toArray
+          |> assertEquals [||]
       }
