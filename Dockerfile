@@ -1,6 +1,6 @@
-FROM fsharp:4.1
+FROM fsharp:4.0
 ENV FRIENDS_VERSION 1.0.2
-RUN sudo apt-get update \
+RUN apt-get update \
     && apt-get install -y zip
 RUN cd /usr/local/src \
     && wget https://github.com/vain0/VainZero.Friends/archive/v${FRIENDS_VERSION}.zip \
