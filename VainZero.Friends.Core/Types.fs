@@ -16,6 +16,15 @@ with
     let (Atom name) = this
     name
 
+/// Represents a Japanese particle (助詞).
+type Particle =
+  | Particle
+    of string
+with
+  override this.ToString() =
+    let (Particle name) = this
+    name
+
 type Variable =
   {
     Name:

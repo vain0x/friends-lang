@@ -17,13 +17,18 @@ module ``test Parsing`` =
   let andProp props = AndProposition (Vector.ofSeq props)
 
   let ``test parseTerm can parse terms`` =
-    let body (source, expected) =
+    let testParse source expected =
       test {
         match Parsing.parseTerm source with
         | Success term ->
           do! term |> assertEquals expected
         | Failure message ->
           return! fail message
+      }
+    let body (source: string, expected) =
+      test {
+        do! testParse source expected
+        do! testParse (source.Replace(" ", "")) expected
       }
     parameterize {
       case
@@ -47,11 +52,11 @@ module ``test Parsing`` =
         , serval |> app "みみ" |> app "あな" |> app "なか"
         )
       case
-        ( "サーバル と かばんちゃん"
+        ( "サーバル と 'かばんちゃん'"
         , listTerm [serval; kabanChan]
         )
       case
-        ( "サーバル の しっぽ と かばんちゃん の みみ"
+        ( "サーバル の 'しっぽ' と 'かばんちゃん' の みみ"
         , listTerm [(serval |> app "しっぽ"); (kabanChan |> app "みみ")]
         )
       case
@@ -67,14 +72,14 @@ module ``test Parsing`` =
         , serval |> app "みみ"
         )
       case
-        ( "「サーバル と かばんちゃん」の みみ"
+        ( "「サーバル と 'かばんちゃん'」の みみ"
         , listTerm [serval; kabanChan] |> app "みみ"
         )
       run body
     }
 
   let ``test parseStatement can parse rules`` =
-    let body (source, expected) =
+    let testParse source expected =
       test {
         match Parsing.parseStatement source with
         | Success statement ->
@@ -86,13 +91,18 @@ module ``test Parsing`` =
         | Failure message ->
           return! fail message
       }
+    let body (source, expected) =
+      test {
+        do! testParse source expected
+        do! testParse (source.Replace(" ", "")) expected
+      }
     parameterize {
       case
-        ( "すごーい！ かばんちゃん は ヒトの フレンズ なんだね！"
+        ( "すごーい！ 'かばんちゃん' は 'ヒトの' フレンズ なんだね！"
         , AxiomRule (human.[kabanChan])
         )
       case
-        ( "すごーい！ きみ が ヒトの フレンズ なら きみ は しっぽのない フレンズ なんだね！"
+        ( "すごーい！ きみ が 'ヒトの' フレンズ なら きみ は 'しっぽのない' フレンズ なんだね！"
         , InferRule
             ( tailless.[kimi]
             , AtomicProposition (human.[kimi])
@@ -104,17 +114,17 @@ module ``test Parsing`` =
         , AxiomRule ((Predicate "小さい").[listTerm [Term.zero; Term.ofNatural 1]])
         )
       case
-        ( "すごーい！ かばんちゃん は サーバル に 紙飛行機 を あげる フレンズ なんだね！"
+        ( "すごーい！ 'かばんちゃん' は サーバル に 紙飛行機 を あげる フレンズ なんだね！"
         , let airplane = AtomTerm (Atom "紙飛行機") in
           AxiomRule ((Predicate "あげる").[listTerm [kabanChan; serval; airplane]])
         )
       // !
       case
-        ( "すごーい！ かばんちゃん は ヒトの フレンズ なんだね！ たーのしー！"
+        ( "すごーい！ 'かばんちゃん' は 'ヒトの' フレンズ なんだね！ たーのしー！"
         , InferRule(human.[kabanChan], CutProposition)
         )
       case
-        ( "すごーい！ きみ が ヒトの フレンズ なら きみ は しっぽのない フレンズ なんだね！ たーのしー！"
+        ( "すごーい！ きみ が 'ヒトの' フレンズ なら きみ は 'しっぽのない' フレンズ なんだね！ たーのしー！"
         , InferRule
             ( tailless.[kimi]
             , AndProposition (Vector.ofList [AtomicProposition (human.[kimi]); CutProposition])
@@ -122,7 +132,7 @@ module ``test Parsing`` =
         )
       // and
       case
-        ( "すごーい！ きみ が しっぽのない フレンズ で きみ が みみのない フレンズ なら きみ は めずらしい フレンズ なんだね！"
+        ( "すごーい！ きみ が 'しっぽのない' フレンズ で きみ が 'みみのない' フレンズ なら きみ は 'めずらしい' フレンズ なんだね！"
         , InferRule
             ( (Predicate "めずらしい").[kimi] 
             , andProp
@@ -136,7 +146,7 @@ module ``test Parsing`` =
     }
 
   let ``test parseStatement can parse queries`` =
-    let body (source, expected) =
+    let testParse source expected =
       test {
         match Parsing.parseStatement source with
         | Success statement ->
@@ -148,9 +158,14 @@ module ``test Parsing`` =
         | Failure message ->
           return! fail message
       }
+    let body (source, expected) =
+      test {
+        do! testParse source expected
+        do! testParse (source.Replace(" ", "")) expected
+      }
     parameterize {
       case
-        ( "だれ が しっぽのない フレンズ なんだっけ？"
+        ( "だれ が 'しっぽのない' フレンズ なんだっけ？"
         , AtomicProposition tailless.[dare]
         )
       run body
