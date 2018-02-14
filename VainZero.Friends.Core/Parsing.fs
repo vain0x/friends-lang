@@ -34,78 +34,17 @@ module Parsing =
         return tree |> BinaryTree.toNonemptyList
       }
 
-    let hagamoParticles =
-      [|"は"; "が"; "も"|]
-
-    let modifierParticles =
-      [|
-        "より"; "から"
-        "までを"; "までの"; "まで"
-        "への"; "へと"; "へ"
-        "だけ"; "くらい"; "ほど"
-        "を"
-        "に"
-      |]
-
-    let otherKeywords =
-      [|
-        "の"
-        "と"
-        "とか"
-        "で"
-        "なら"
-        "フレンズ"
-        "なんだね！"
-        "なんだっけ？"
-        "たーのしー！"
-      |]
-
-    let keywords =
-      [|
-        yield! hagamoParticles
-        yield! modifierParticles
-        yield! otherKeywords
-      |]
-
-    let hagamoParser: Parser<Particle> =
-      parse {
-        do! skipAnyOf "はがも"
-        return Particle "が"
-      }
-
-    let modifierParticleParser: Parser<Particle> =
-      [|
-        for identifier in modifierParticles ->
-          parse {
-            do! skipString identifier
-            return Particle identifier
-          }
-      |] |> Primitives.choice
-
-    let skipKeywordParser =
-      keywords
-      |> Array.map skipString
-      |> Primitives.choice
-
-    let skipSymbolParser =
-      skipAnyOf "「」'‘’"
-
-    let rawIdentifierParser =
-      let charParser = letter <|> digit <|> pchar '_'
-      let endParser = skipKeywordParser <|> skipSymbolParser <|> spaces1 <|> eof
-      many1CharsTill charParser (followedBy endParser)
-
-    let quotedIdentifierParser =
-      parse {
-        do! skipAnyOf "'‘’" |> attempt
-        return! many1CharsTill anyChar (skipAnyOf "'’")
-      }
+    let identifierCharParser =
+      letter <|> digit <|> pchar '_'
 
     let identifierParser: Parser<string> =
-      quotedIdentifierParser <|> rawIdentifierParser
+      many1Chars identifierCharParser
 
     let keywordParser wordParser =
-      spaces >>. wordParser .>> spaces
+      spaces >>. wordParser >>. notFollowedBy identifierCharParser >>. spaces
+
+    let hagamoParser: Parser<unit> =
+      keywordParser (skipAnyOf "はがも")
 
     let (termParser: Parser<Term>, termParserRef) =
       createParserForwardedToRef ()
@@ -128,6 +67,7 @@ module Parsing =
     let naturalTermParser =
       parse {
         let! digits = many1Chars digit
+        do! notFollowedBy identifierCharParser
         match Int32.TryParse(digits) with
         | (true, n) ->
           return Term.ofNatural n
@@ -171,8 +111,7 @@ module Parsing =
 
     let listTermParser =
       parse {
-        let separatorParser =
-          keywordParser (notFollowedBy (skipString "とか") >>. skipChar 'と')
+        let separatorParser = keywordParser (skipChar 'と')
         let! (term, terms) = list1Parser appTermParser separatorParser
         let! endsWithTail =
           skipString "とか" |> keywordParser |> attempt |> opt
@@ -193,9 +132,12 @@ module Parsing =
     let atomicPropositionParser =
       parse {
         let! term = termParser
-        let! _ = spaces >>. hagamoParser .>> spaces
+        do! hagamoParser
         let! optionalTerms =
-          many (attempt (termParser .>> spaces .>> modifierParticleParser .>> spaces))
+          let joshiParser =
+            notFollowedBy (skipString "フレンズ")
+            >>. identifierParser
+          many (attempt (termParser .>> spaces .>> joshiParser .>> spaces))
         let! predicateName = identifierParser
         do! keywordParser (skipString "フレンズ")
         let term =
