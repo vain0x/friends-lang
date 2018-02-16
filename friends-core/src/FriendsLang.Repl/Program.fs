@@ -1,8 +1,10 @@
-﻿// Learn more about F# at http://fsharp.org
+﻿namespace FriendsLang.Repl
 
 open System
+open FriendsLang.Compiler
 
-[<EntryPoint>]
-let main argv =
-    printfn "Hello World from F#!"
-    0 // return an integer exit code
+module Program =
+  [<EntryPoint>]
+  let main _ =
+    printfn "Compiler.zero = %d" Compiler.zero
+    0

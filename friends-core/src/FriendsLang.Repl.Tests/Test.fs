@@ -1,9 +1,9 @@
-module Test
+module FriendsLang.Repl.Tests
 
 open Persimmon
-open UseTestNameByReflection
+open Persimmon.Syntax.UseTestNameByReflection
 
-let ``my test`` = test {
-  do! assertPred true
-}
-
+let ``my test`` =
+  test {
+    do! assertPred true
+  }
