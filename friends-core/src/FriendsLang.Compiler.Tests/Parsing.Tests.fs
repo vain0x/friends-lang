@@ -1,4 +1,4 @@
-﻿namespace FriendsLang.Compiler
+namespace FriendsLang.Compiler
 
 open Persimmon
 open Persimmon.Syntax.UseTestNameByReflection

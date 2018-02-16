@@ -1,4 +1,4 @@
-﻿namespace FriendsLang.Repl
+namespace FriendsLang.Repl
 
 open System
 open System.Text

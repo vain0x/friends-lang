@@ -1,4 +1,4 @@
-﻿namespace FriendsLang.Compiler
+namespace FriendsLang.Compiler
 
 module Vector = Array
 
