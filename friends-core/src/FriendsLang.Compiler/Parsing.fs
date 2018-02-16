@@ -1,9 +1,7 @@
-﻿namespace VainZero.Friends.Core
+namespace FriendsLang.Compiler
 
 open System
-open Basis.Core
 open FParsec
-open VainZero.Collections
 
 module Parsing =
   module internal Internal =

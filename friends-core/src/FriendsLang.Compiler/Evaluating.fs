@@ -1,9 +1,6 @@
-﻿namespace VainZero.Friends.Core
+namespace FriendsLang.Compiler
 
-open System.Collections.Generic
-open Basis.Core
-open ExtCore.Collections
-open VainZero
+module Vector = Array
 
 module Counter =
   let counter = ref 0
@@ -83,7 +80,7 @@ module TermExtension =
     | AtomTerm (Atom Term.NilName) -> Some ()
     | _ -> None
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]  
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module AtomicProposition =
   let rec replaceId id (prop: AtomicProposition) =
     prop.Predicate.[prop.Term |> Term.replaceId id]

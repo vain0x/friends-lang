@@ -1,6 +1,5 @@
-﻿namespace VainZero.Collections
+namespace FriendsLang.Compiler
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]  
 module NonemptyList =
   let decomposeLast (head, tail) =
     let rec decomposeLast acc =

@@ -1,6 +1,5 @@
-﻿namespace VainZero.Friends.Core
+namespace FriendsLang.Compiler
 
-open Basis.Core
 open Persimmon
 open Persimmon.Syntax.UseTestNameByReflection
 
@@ -124,7 +123,7 @@ module ``test Parsing`` =
       case
         ( "すごーい！ きみ が しっぽのない フレンズ で きみ が みみのない フレンズ なら きみ は めずらしい フレンズ なんだね！"
         , InferRule
-            ( (Predicate "めずらしい").[kimi] 
+            ( (Predicate "めずらしい").[kimi]
             , andProp
                 [
                   AtomicProposition tailless.[kimi]

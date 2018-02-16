@@ -1,4 +1,35 @@
-﻿namespace VainZero.Friends.Core
+namespace FriendsLang.Compiler
+
+// Polyfill.
+
+type vector<'T> = 'T[]
+
+type HashMap<'K, 'V when 'K : comparison> = Map<'K, 'V>
+
+module Vector =
+  let singleton x = Array.singleton x
+  let append x = Array.append x
+  let ofList x = Array.ofList x
+  let ofSeq x = Array.ofSeq x
+
+module HashMap =
+  let empty = Map.empty
+
+module Result =
+  let Success x = Ok x
+  let Failure x = Error x
+
+[<AutoOpen>]
+module ResultExtension =
+  let (|Success|Failure|) =
+    function
+    | Ok x -> Success x
+    | Error x -> Failure x
+
+module Option =
+  let getOr x = Option.defaultValue x
+
+
 
 type Predicate =
   | Predicate

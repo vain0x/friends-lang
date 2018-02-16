@@ -1,4 +1,7 @@
 # Friends
+
+[![Build Status](https://travis-ci.org/vain0/friends-lang.svg?branch=master)](https://travis-ci.org/vain0/friends-lang)
+
 **Friends** は、ジャパリパークのフレンズのためのプログラミング言語。
 
 - [すごーい！ きみはプログラミング言語を実装できるフレンズなんだね - Qiita](http://qiita.com/vain0/items/6d3b75f667d3ec7f1d2a)
