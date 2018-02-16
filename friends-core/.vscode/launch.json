@@ -7,10 +7,7 @@
             "request": "launch",
             "preLaunchTask": "build Repl",
             "program": "${workspaceFolder}/src/FriendsLang.Repl/bin/Debug/netcoreapp2.0/FriendsLang.Repl.dll",
-            "args": [
-                "--encoding",
-                "utf-16"
-            ],
+            "args": [],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "stopAtEntry": false,

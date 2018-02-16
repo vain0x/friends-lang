@@ -101,13 +101,7 @@ module Program =
   [<EntryPoint>]
   let main argv =
     try
-      match argv with
-      | [|"--encoding"; encodingName|] ->
-        let encoding =
-          System.Text.Encoding.GetEncoding(encodingName)
-        Console.InputEncoding <- encoding
-        Console.OutputEncoding <- encoding
-      | _ -> ()
+      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
       printfn "%s" "ようこそジャパリパークへ！"
       run ()
