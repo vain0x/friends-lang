@@ -1,0 +1,81 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build Compiler.Tests",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceRoot}/src/FriendsLang.Compiler.Tests/FriendsLang.Compiler.Tests.fsproj"
+            ],
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "test Compiler.Tests",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceRoot}/src/FriendsLang.Compiler.Tests/FriendsLang.Compiler.Tests.fsproj"
+            ],
+            "type": "shell",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build Repl",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceRoot}/src/FriendsLang.Repl/FriendsLang.Repl.fsproj"
+            ],
+            "type": "shell",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build Repl.Tests",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceRoot}/src/FriendsLang.Repl.Tests/FriendsLang.Repl.Tests.fsproj"
+            ],
+            "type": "shell",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "test Repl.Tests",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceRoot}/src/FriendsLang.Repl.Tests/FriendsLang.Repl.Tests.fsproj"
+            ],
+            "type": "shell",
+            "group": "test",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
