@@ -1,9 +1,12 @@
-﻿namespace VainZero.Friends.Repl
+namespace FriendsLang.Repl
 
 open System
 open System.Text
-open Basis.Core
-open VainZero.Friends.Core
+open FriendsLang.Compiler
+
+module String =
+  let isEmpty str = String.IsNullOrEmpty(str)
+  let trimEnd (chars: char[]) (str: string) = str.TrimEnd(chars)
 
 module Console =
   let rec readYesNo () =
@@ -75,14 +78,14 @@ module Program =
       buffer.AppendLine(line) |> ignore
       let source = string buffer
       match Parsing.parseStatement source with
-      | Success statement ->
+      | Result.Ok statement ->
         match statement with
         | Rule rule ->
           knowledge <- knowledge.Add(rule)
         | Query prop ->
           query prop
         buffer.Clear() |> ignore
-      | Failure message ->
+      | Result.Error message ->
         if line |> String.isEmpty then
           eprintfn "%s" message
           buffer.Clear() |> ignore
@@ -96,7 +99,12 @@ module Program =
       run ()
 
   [<EntryPoint>]
-  let main _ =
-    printfn "%s" "ようこそジャパリパークへ！"
-    run ()
+  let main argv =
+    try
+      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+      printfn "%s" "ようこそジャパリパークへ！"
+      run ()
+    with
+    | e -> eprintfn "%A" e
     0

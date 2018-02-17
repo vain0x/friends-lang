@@ -1,9 +1,7 @@
-﻿namespace VainZero.Friends.Core
+namespace FriendsLang.Compiler
 
 open System
-open Basis.Core
 open FParsec
-open VainZero.Collections
 
 module Parsing =
   module internal Internal =
@@ -227,9 +225,9 @@ module Parsing =
     let run source parser =
       match runParserOnString parser () "input" source with
       | Success (statement, (), _) ->
-        statement |> Result.Success
+        statement |> Result.Ok
       | Failure (message, _, _) ->
-        message |> Result.Failure
+        message |> Result.Error
 
   open Internal
 

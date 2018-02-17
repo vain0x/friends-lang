@@ -1,6 +1,5 @@
-﻿namespace VainZero.Friends.Core
+namespace FriendsLang.Compiler
 
-open Basis.Core
 open Persimmon
 open Persimmon.Syntax.UseTestNameByReflection
 
@@ -20,9 +19,9 @@ module ``test Parsing`` =
     let body (source, expected) =
       test {
         match Parsing.parseTerm source with
-        | Success term ->
+        | Result.Ok term ->
           do! term |> assertEquals expected
-        | Failure message ->
+        | Result.Error message ->
           return! fail message
       }
     parameterize {
@@ -77,13 +76,13 @@ module ``test Parsing`` =
     let body (source, expected) =
       test {
         match Parsing.parseStatement source with
-        | Success statement ->
+        | Result.Ok statement ->
           match statement with
           | Rule actual ->
             do! actual |> assertEquals expected
           | Query prop ->
             return! fail (sprintf "Query: %A" prop)
-        | Failure message ->
+        | Result.Error message ->
           return! fail message
       }
     parameterize {
@@ -124,7 +123,7 @@ module ``test Parsing`` =
       case
         ( "すごーい！ きみ が しっぽのない フレンズ で きみ が みみのない フレンズ なら きみ は めずらしい フレンズ なんだね！"
         , InferRule
-            ( (Predicate "めずらしい").[kimi] 
+            ( (Predicate "めずらしい").[kimi]
             , andProp
                 [
                   AtomicProposition tailless.[kimi]
@@ -139,13 +138,13 @@ module ``test Parsing`` =
     let body (source, expected) =
       test {
         match Parsing.parseStatement source with
-        | Success statement ->
+        | Result.Ok statement ->
           match statement with
           | Rule rule ->
             return! fail (sprintf "Rule: %A" rule)
           | Query actual ->
             do! actual |> assertEquals expected
-        | Failure message ->
+        | Result.Error message ->
           return! fail message
       }
     parameterize {

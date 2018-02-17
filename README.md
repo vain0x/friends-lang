@@ -1,27 +1,19 @@
-# Friends
-**Friends** は、ジャパリパークのフレンズのためのプログラミング言語。
+# フレンズ言語 (Friends-lang)
+
+[![Build Status](https://travis-ci.org/vain0/friends-lang.svg?branch=master)](https://travis-ci.org/vain0/friends-lang)
+
+**フレンズ言語** は、ジャパリパークのフレンズのためのプログラミング言語。
 
 - [すごーい！ きみはプログラミング言語を実装できるフレンズなんだね - Qiita](http://qiita.com/vain0/items/6d3b75f667d3ec7f1d2a)
 
 ## インストールと使い方
-### Windows の場合
 
-- [最新版の friends.zip をダウンロード](https://github.com/vain0/VainZero.Friends/releases/latest)して展開します。
-- `VainZero.Friends.Repl.exe` を実行します。
+- [最新版のパッケージをダウンロード](https://github.com/vain0/VainZero.Friends/releases/latest)して展開します。
+    - Windows の場合は `friendsi-win-x64.zip`
+    - macOS の場合は `friendsi-osx-x64.zip`
+    - Liunx の場合は `friendsi-linux-x64.zip`
+- `fsharpi.exe` (または `fsharpi`) を実行します。
 - ようこそジャパリパークへ！
-
-### macOS / Linux の場合
-
-- Git と Docker をインストールします。
-- 適当なディレクトリーで次のコマンドを実行します。
-
-```sh
-$ git clone git@github.com:vain0/VainZero.Friends.git
-$ docker build -t friends-lang ./VainZero.Friends
-$ docker run -it friends-lang friends
-ようこそジャパリパークへ！
->
-```
 
 ## 文法
 ### すごーい！ 文

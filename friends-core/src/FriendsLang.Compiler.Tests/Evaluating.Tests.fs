@@ -1,6 +1,5 @@
-﻿namespace VainZero.Friends.Core
+namespace FriendsLang.Compiler
 
-open Basis.Core
 open Persimmon
 open Persimmon.Syntax.UseTestNameByReflection
 
@@ -55,7 +54,7 @@ module ``test Environment`` =
         , x, x
         )
       // Variables match each other and don't refer to circularly.
-      case 
+      case
         ( x, y
         , x, y
         )
@@ -131,7 +130,7 @@ module ``test Knowledge `` =
 
   let socrates = AtomTerm (Atom "socrates")
   let plato = AtomTerm (Atom "plato")
-  
+
   let socratesIsHuman =
     AxiomRule (human.[socrates])
   let platoIsHuman =
@@ -187,7 +186,7 @@ module ``test Knowledge `` =
         do!
           socratesKnowledge
           |> Knowledge.query prop
-          |> Seq.map 
+          |> Seq.map
             (fun assignments ->
               assignments |> Array.map (fun (var, term) -> (var.Name, term))
             )

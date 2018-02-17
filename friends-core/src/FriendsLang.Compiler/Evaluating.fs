@@ -1,9 +1,4 @@
-﻿namespace VainZero.Friends.Core
-
-open System.Collections.Generic
-open Basis.Core
-open ExtCore.Collections
-open VainZero
+namespace FriendsLang.Compiler
 
 module Counter =
   let counter = ref 0
@@ -83,7 +78,7 @@ module TermExtension =
     | AtomTerm (Atom Term.NilName) -> Some ()
     | _ -> None
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]  
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module AtomicProposition =
   let rec replaceId id (prop: AtomicProposition) =
     prop.Predicate.[prop.Term |> Term.replaceId id]
@@ -126,9 +121,9 @@ module Rule =
       let body = Proposition.replaceId id body
       InferRule (head, body)
 
-type Knowledge(map: HashMap<Predicate, vector<Rule>>) =
+type Knowledge(map: HashMap<Predicate, Vector<Rule>>) =
   member this.FindAll(predicate) =
-    map.TryFind(predicate) |> Option.getOr Vector.empty
+    map.TryFind(predicate) |> Option.defaultValue Vector.empty
 
   member this.Add(rule) =
     let predicate = (rule: Rule).Predicate
