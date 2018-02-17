@@ -1,7 +1,5 @@
 namespace FriendsLang.Compiler
 
-module Vector = Array
-
 module Counter =
   let counter = ref 0
 

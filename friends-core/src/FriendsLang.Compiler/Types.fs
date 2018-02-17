@@ -1,13 +1,18 @@
 namespace FriendsLang.Compiler
 
-// Polyfill.
-
+/// Represents an immutable array.
+/// TODO: Use System.Collections.ImmutableArray or something.
 type Vector<'T> = 'T[]
 
+/// Represents an immutable, efficient associative array.
+/// TODO: Use System.Collections.ImmutableDictionary or something.
 type HashMap<'K, 'V when 'K : comparison> = Map<'K, 'V>
 
 module Vector =
+  let empty = Array.empty
   let singleton x = Array.singleton x
+  let map x = Array.map x
+  let fold x = Array.fold x
   let append x = Array.append x
   let ofList x = Array.ofList x
   let ofSeq x = Array.ofSeq x
