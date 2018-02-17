@@ -11,7 +11,7 @@
 - [最新版のパッケージをダウンロード](https://github.com/vain0/friends-lang/releases/latest)して展開します。
     - Windows の場合は `friendsi-win-x64.zip`
     - macOS の場合は `friendsi-osx-x64.zip`
-    - Liunx の場合は `friendsi-linux-x64.zip`
+    - Linux の場合は `friendsi-linux-x64.zip`
 - `friendsi.exe` (または `friendsi`) を実行します。
 - ようこそジャパリパークへ！
 
