@@ -2,7 +2,7 @@ namespace FriendsLang.Compiler
 
 // Polyfill.
 
-type vector<'T> = 'T[]
+type Vector<'T> = 'T[]
 
 type HashMap<'K, 'V when 'K : comparison> = Map<'K, 'V>
 
@@ -83,7 +83,7 @@ type Proposition =
   | AtomicProposition
     of AtomicProposition
   | AndProposition
-    of vector<Proposition>
+    of Vector<Proposition>
 with
   member this.And(r) =
     match (this, r) with
