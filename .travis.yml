@@ -12,6 +12,8 @@ sudo: false
 install:
   - cd ./friends-core/src/
   - dotnet restore
+  - cd ../../
 script:
-  - dotnet test FriendsLang.Compiler.Tests
-  - dotnet test FriendsLang.Repl.Tests
+  - cd ./friends-core/src/
+  - chmod +x ./test.sh
+  - ./test.sh
