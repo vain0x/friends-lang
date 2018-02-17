@@ -15,17 +15,6 @@ module Vector =
 module HashMap =
   let empty = Map.empty
 
-module Result =
-  let Success x = Ok x
-  let Failure x = Error x
-
-[<AutoOpen>]
-module ResultExtension =
-  let (|Success|Failure|) =
-    function
-    | Ok x -> Success x
-    | Error x -> Failure x
-
 module Option =
   let getOr x = Option.defaultValue x
 
