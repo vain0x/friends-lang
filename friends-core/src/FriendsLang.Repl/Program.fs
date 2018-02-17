@@ -78,14 +78,14 @@ module Program =
       buffer.AppendLine(line) |> ignore
       let source = string buffer
       match Parsing.parseStatement source with
-      | Success statement ->
+      | Result.Ok statement ->
         match statement with
         | Rule rule ->
           knowledge <- knowledge.Add(rule)
         | Query prop ->
           query prop
         buffer.Clear() |> ignore
-      | Failure message ->
+      | Result.Error message ->
         if line |> String.isEmpty then
           eprintfn "%s" message
           buffer.Clear() |> ignore

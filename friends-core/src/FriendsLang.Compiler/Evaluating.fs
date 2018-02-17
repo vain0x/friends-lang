@@ -1,7 +1,5 @@
 namespace FriendsLang.Compiler
 
-module Vector = Array
-
 module Counter =
   let counter = ref 0
 
@@ -123,9 +121,9 @@ module Rule =
       let body = Proposition.replaceId id body
       InferRule (head, body)
 
-type Knowledge(map: HashMap<Predicate, vector<Rule>>) =
+type Knowledge(map: HashMap<Predicate, Vector<Rule>>) =
   member this.FindAll(predicate) =
-    map.TryFind(predicate) |> Option.getOr Vector.empty
+    map.TryFind(predicate) |> Option.defaultValue Vector.empty
 
   member this.Add(rule) =
     let predicate = (rule: Rule).Predicate

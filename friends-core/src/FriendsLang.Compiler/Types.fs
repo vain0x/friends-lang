@@ -1,33 +1,24 @@
 namespace FriendsLang.Compiler
 
-// Polyfill.
+/// Represents an immutable array.
+/// TODO: Use System.Collections.ImmutableArray or something.
+type Vector<'T> = 'T[]
 
-type vector<'T> = 'T[]
-
+/// Represents an immutable, efficient associative array.
+/// TODO: Use System.Collections.ImmutableDictionary or something.
 type HashMap<'K, 'V when 'K : comparison> = Map<'K, 'V>
 
 module Vector =
+  let empty = Array.empty
   let singleton x = Array.singleton x
+  let map x = Array.map x
+  let fold x = Array.fold x
   let append x = Array.append x
   let ofList x = Array.ofList x
   let ofSeq x = Array.ofSeq x
 
 module HashMap =
   let empty = Map.empty
-
-module Result =
-  let Success x = Ok x
-  let Failure x = Error x
-
-[<AutoOpen>]
-module ResultExtension =
-  let (|Success|Failure|) =
-    function
-    | Ok x -> Success x
-    | Error x -> Failure x
-
-module Option =
-  let getOr x = Option.defaultValue x
 
 
 
@@ -97,7 +88,7 @@ type Proposition =
   | AtomicProposition
     of AtomicProposition
   | AndProposition
-    of vector<Proposition>
+    of Vector<Proposition>
 with
   member this.And(r) =
     match (this, r) with
