@@ -125,7 +125,7 @@ module Rule =
 
 type Knowledge(map: HashMap<Predicate, vector<Rule>>) =
   member this.FindAll(predicate) =
-    map.TryFind(predicate) |> Option.getOr Vector.empty
+    map.TryFind(predicate) |> Option.defaultValue Vector.empty
 
   member this.Add(rule) =
     let predicate = (rule: Rule).Predicate

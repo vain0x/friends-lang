@@ -15,9 +15,6 @@ module Vector =
 module HashMap =
   let empty = Map.empty
 
-module Option =
-  let getOr x = Option.defaultValue x
-
 
 
 type Predicate =
