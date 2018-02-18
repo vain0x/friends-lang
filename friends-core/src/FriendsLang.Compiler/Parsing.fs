@@ -1,8 +1,12 @@
-namespace FriendsLang.Compiler
+namespace FriendsLang.Compiler.Parsing
 
 open System
 open FParsec
+open FriendsLang.Compiler
+open FriendsLang.Compiler.Ast
+open FriendsLang.Compiler.Evaluating
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Parsing =
   module internal Internal =
     type BinaryTree<'x> =

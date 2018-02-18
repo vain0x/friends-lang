@@ -1,4 +1,7 @@
-namespace FriendsLang.Compiler
+namespace FriendsLang.Compiler.Evaluating
+
+open FriendsLang.Compiler
+open FriendsLang.Compiler.Ast
 
 module Counter =
   let counter = ref 0
@@ -182,7 +185,6 @@ type Environment(map: Map<Variable, Term>) =
   static member val Empty =
     Environment(Map.empty)
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Environment =
   let rec tryUnify term term' (env: Environment) =
     let tryUnifyVar var term (env: Environment) =

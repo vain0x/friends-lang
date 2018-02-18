@@ -3,6 +3,9 @@ namespace FriendsLang.Repl
 open System
 open System.Text
 open FriendsLang.Compiler
+open FriendsLang.Compiler.Ast
+open FriendsLang.Compiler.Parsing
+open FriendsLang.Compiler.Evaluating
 
 module String =
   let isEmpty str = String.IsNullOrEmpty(str)
