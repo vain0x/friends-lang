@@ -1,5 +1,7 @@
 namespace FriendsLang.Compiler
 
+  type NonemptyList<'T> = 'T * 'T list
+
   /// Represents an immutable array.
   /// TODO: Use System.Collections.ImmutableArray or something.
   type Vector<'T> = 'T[]
