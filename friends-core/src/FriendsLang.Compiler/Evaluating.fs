@@ -11,7 +11,6 @@ module Counter =
     counter |> incr
     value
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Term =
   [<Literal>]
   let NilName = "nil"
@@ -81,7 +80,6 @@ module TermExtension =
     | AtomTerm (Atom Term.NilName) -> Some ()
     | _ -> None
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module AtomicProposition =
   let rec replaceId id (prop: AtomicProposition) =
     prop.Predicate.[prop.Term |> Term.replaceId id]
@@ -89,7 +87,6 @@ module AtomicProposition =
   let rec refresh prop =
     replaceId (Counter.nextId ()) prop
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Proposition =
   let rec variables =
     function
@@ -112,7 +109,6 @@ module Proposition =
   let rec refresh prop =
     replaceId (Counter.nextId ()) prop
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Rule =
   let rec refresh =
     function
@@ -211,7 +207,6 @@ module Environment =
     | (_, _) ->
       None
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Knowledge =
   type private BacktrackFlow =
     | Break
