@@ -27,6 +27,12 @@ namespace FriendsLang.Compiler
           decomposeLast (x :: acc) xs
       decomposeLast [head] tail
 
+  module String =
+    open System
+
+    let isEmpty str = String.IsNullOrEmpty(str)
+    let trimEnd (chars: char[]) (str: string) = str.TrimEnd(chars)
+
 namespace FriendsLang.Compiler.Ast
 
   open FriendsLang.Compiler

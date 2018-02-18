@@ -7,10 +7,6 @@ open FriendsLang.Compiler.Ast
 open FriendsLang.Compiler.Parsing
 open FriendsLang.Compiler.Evaluating
 
-module String =
-  let isEmpty str = String.IsNullOrEmpty(str)
-  let trimEnd (chars: char[]) (str: string) = str.TrimEnd(chars)
-
 module Console =
   let rec readYesNo () =
     match Console.ReadLine() with
