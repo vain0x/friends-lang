@@ -107,7 +107,7 @@ module ``test Environment`` =
     let body (term, term') =
       test {
         match Environment.Empty |> Environment.tryUnify term term' with
-        | Some env ->
+        | Some _ ->
           return! fail "Unification succeeded unexpectedly."
         | None ->
           return ()

@@ -122,10 +122,10 @@ module Rule =
       InferRule (head, body)
 
 type Knowledge(map: HashMap<Predicate, Vector<Rule>>) =
-  member this.FindAll(predicate) =
+  member __.FindAll(predicate) =
     map.TryFind(predicate) |> Option.defaultValue Vector.empty
 
-  member this.Add(rule) =
+  member __.Add(rule) =
     let predicate = (rule: Rule).Predicate
     let newRules = Vector.singleton rule
     let rules =
@@ -170,13 +170,13 @@ type Environment(map: Map<Variable, Term>) =
     else
       map |> Map.add v term
 
-  member this.TryFind(var) =
+  member __.TryFind(var) =
     tryFind var
 
-  member this.Substitute(term) =
+  member __.Substitute(term) =
     substitute term
 
-  member this.Add(var, term) =
+  member __.Add(var, term) =
     Environment(add var term)
 
   static member val Empty =
@@ -227,7 +227,7 @@ module Knowledge =
     let prove prop env =
       ProveFunction(env, knowledge).Prove(prop: Proposition)
 
-    member this.Prove(prop: AtomicProposition) =
+    member __.Prove(prop: AtomicProposition) =
       let rules =
         knowledge.FindAll(prop.Predicate)
         |> Vector.map Rule.refresh

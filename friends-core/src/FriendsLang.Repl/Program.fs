@@ -27,7 +27,7 @@ module Program =
 
   let rec (|NaturalTerm|_|) =
     function
-    | AtomTerm (Atom "0") as term ->
+    | AtomTerm (Atom "0") ->
       Some 0
     | AppTerm (Atom "次", NaturalTerm n) ->
       Some (n + 1)
@@ -99,9 +99,9 @@ module Program =
       run ()
 
   [<EntryPoint>]
-  let main argv =
+  let main _ =
     try
-      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
 
       printfn "%s" "ようこそジャパリパークへ！"
       run ()
