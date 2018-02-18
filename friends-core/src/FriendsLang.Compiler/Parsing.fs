@@ -1,7 +1,10 @@
-namespace FriendsLang.Compiler
+namespace FriendsLang.Compiler.Parsing
 
 open System
 open FParsec
+open FriendsLang.Compiler
+open FriendsLang.Compiler.Ast
+open FriendsLang.Compiler.Evaluating
 
 module Parsing =
   module internal Internal =
@@ -11,7 +14,6 @@ module Parsing =
       | Node
         of BinaryTree<'x> * BinaryTree<'x>
 
-    [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
     module BinaryTree =
       let rec toNonemptyList =
         function

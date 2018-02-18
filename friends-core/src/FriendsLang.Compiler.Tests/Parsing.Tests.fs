@@ -1,5 +1,9 @@
-namespace FriendsLang.Compiler
+namespace FriendsLang.Compiler.Parsing
 
+open FriendsLang.Compiler
+open FriendsLang.Compiler.Ast
+open FriendsLang.Compiler.Evaluating
+open FriendsLang.Compiler.Parsing
 open Persimmon
 open Persimmon.Syntax.UseTestNameByReflection
 

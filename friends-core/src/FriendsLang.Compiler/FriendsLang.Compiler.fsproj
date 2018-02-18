@@ -5,10 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Collections.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="Domain.fs" />
     <Compile Include="Evaluating.fs" />
     <Compile Include="Parsing.fs" />
+    <Compile Include="Printing.fs" />
   </ItemGroup>
 
   <ItemGroup>
