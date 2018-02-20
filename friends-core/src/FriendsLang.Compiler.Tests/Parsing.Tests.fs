@@ -73,6 +73,11 @@ module ``test Parsing`` =
         ( "「サーバル と かばんちゃん」の みみ"
         , listTerm [serval; kabanChan] |> app "みみ"
         )
+      // Test unicode spaces.
+      case
+        ( "サーバル　と　かばんちゃん"
+        , listTerm [serval; kabanChan]
+        )
       run body
     }
 

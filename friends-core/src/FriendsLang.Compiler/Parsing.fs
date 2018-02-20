@@ -34,6 +34,8 @@ module Parsing =
         return tree |> BinaryTree.toNonemptyList
       }
 
+    let blank = unicodeSpaces
+
     let identifierCharParser =
       letter <|> digit <|> pchar '_'
 
@@ -41,7 +43,7 @@ module Parsing =
       many1Chars identifierCharParser
 
     let keywordParser wordParser =
-      spaces >>. wordParser >>. notFollowedBy identifierCharParser >>. spaces
+      blank >>. wordParser >>. notFollowedBy identifierCharParser >>. blank
 
     let hagamoParser: Parser<unit> =
       keywordParser (skipAnyOf "はがも")
@@ -79,9 +81,9 @@ module Parsing =
     let quotedTermParser =
       parse {
         do! skipChar '「' |> attempt
-        do! spaces
+        do! blank
         let! term = termParser
-        do! spaces >>. skipChar '」'
+        do! blank >>. skipChar '」'
         return term
       }
 
@@ -137,7 +139,7 @@ module Parsing =
           let joshiParser =
             notFollowedBy (skipString "フレンズ")
             >>. identifierParser
-          many (attempt (termParser .>> spaces .>> joshiParser .>> spaces))
+          many (attempt (termParser .>> blank .>> joshiParser .>> blank))
         let! predicateName = identifierParser
         do! keywordParser (skipString "フレンズ")
         let term =
@@ -218,9 +220,9 @@ module Parsing =
 
     let inputParser =
       parse {
-        do! spaces
+        do! blank
         let! statement = statementParser
-        do! spaces >>. eof
+        do! blank >>. eof
         return statement
       }
 
