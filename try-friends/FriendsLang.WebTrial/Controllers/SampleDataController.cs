@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using FLC = FriendsLang.Compiler;
+using FLE = FriendsLang.Compiler.Evaluating;
+using FLP = FriendsLang.Compiler.Parsing.Parsing;
 
 namespace FriendsLang.WebTrial.Controllers
 {
@@ -14,12 +19,44 @@ namespace FriendsLang.WebTrial.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        [HttpGet("[action]")]
-        public IActionResult Json()
+        [HttpPost("[action]")]
+        public IActionResult Parse()
         {
-            return new ContentResult() {
-                Content = "{\"a\": 1, \"b\": 2}",
-                ContentType = "application/json",
+            var blankLineRegex = new Regex("(\\r\\n|\\n){2}");
+
+            var ruleScript = Request.Form["knowledge"];
+
+            var ruleScripts =
+             blankLineRegex
+                .Split(ruleScript)
+                .Select(str =>
+                    str
+                    .Replace("\r", " ")
+                    .Replace("\n", " ")
+                    .Trim()
+                )
+                .Where(str => !String.IsNullOrEmpty(str))
+                .ToArray();
+
+            var output = new StringBuilder();
+            foreach (var script in ruleScripts)
+            {
+                output.AppendLine($"> {script}");
+
+                var result = FLP.parseStatement(script);
+                if (result.IsError)
+                {
+                    output.AppendLine(result.ErrorValue);
+                    continue;
+                }
+
+                output.AppendLine();
+            }
+
+            return new ContentResult()
+            {
+                Content = output.ToString(),
+                ContentType = "text",
                 StatusCode = 200,
             };
         }
