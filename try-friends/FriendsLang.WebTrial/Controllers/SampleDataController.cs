@@ -15,6 +15,16 @@ namespace FriendsLang.WebTrial.Controllers
         };
 
         [HttpGet("[action]")]
+        public IActionResult Json()
+        {
+            return new ContentResult() {
+                Content = "{\"a\": 1, \"b\": 2}",
+                ContentType = "application/json",
+                StatusCode = 200,
+            };
+        }
+
+        [HttpGet("[action]")]
         public IEnumerable<WeatherForecast> WeatherForecasts()
         {
             var rng = new Random();
