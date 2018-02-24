@@ -19,16 +19,12 @@ namespace FriendsLang.WebTrial.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        [HttpPost("[action]")]
-        public IActionResult Parse()
+        private static string[] SplitIntoParagraphs(string input)
         {
             var blankLineRegex = new Regex("(\\r\\n|\\n){2}");
-
-            var ruleScript = Request.Form["knowledge"];
-
-            var ruleScripts =
-             blankLineRegex
-                .Split(ruleScript)
+            return
+                blankLineRegex
+                .Split(input)
                 .Select(str =>
                     str
                     .Replace("\r", " ")
@@ -37,13 +33,18 @@ namespace FriendsLang.WebTrial.Controllers
                 )
                 .Where(str => !String.IsNullOrEmpty(str))
                 .ToArray();
+        }
+
+        private static string Parse(string script)
+        {
+            var paragraphs = SplitIntoParagraphs(script);
 
             var output = new StringBuilder();
-            foreach (var script in ruleScripts)
+            foreach (var paragraph in paragraphs)
             {
-                output.AppendLine($"> {script}");
+                output.AppendLine($"> {paragraph}");
 
-                var result = FLP.parseStatement(script);
+                var result = FLP.parseStatement(paragraph);
                 if (result.IsError)
                 {
                     output.AppendLine(result.ErrorValue);
@@ -53,9 +54,19 @@ namespace FriendsLang.WebTrial.Controllers
                 output.AppendLine();
             }
 
+            return output.ToString();
+        }
+
+        [HttpPost("[action]")]
+        public IActionResult Parse()
+        {
+            var ruleScript = Request.Form["knowledge"];
+
+            var output = Parse(ruleScript);
+
             return new ContentResult()
             {
-                Content = output.ToString(),
+                Content = output,
                 ContentType = "text",
                 StatusCode = 200,
             };
