@@ -60,7 +60,7 @@ module Term =
         yield! variables tailTerm
     }
 
-  let rec replaceId id =
+  let replaceId id =
     let rec loop term =
       match term with
       | VarTerm var ->
