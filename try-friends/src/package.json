@@ -1,0 +1,25 @@
+{
+  "name": "try-friends",
+  "version": "1.0.0",
+  "description": "Web app to try friends-lang.",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vain0/try-friends.git"
+  },
+  "author": "vain0",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vain0/try-friends/issues"
+  },
+  "homepage": "https://github.com/vain0/try-friends#readme",
+  "devDependencies": {
+  },
+  "dependencies": {
+  }
+}
