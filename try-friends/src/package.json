@@ -6,7 +6,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "jasmine"
+    "watch": "run-p watch:*",
+    "watch:webpack": "cross-env NODE_ENV=development webpack --watch",
+    "watch:webpack-dev-server": "cross-env NODE_ENV=development webpack-dev-server --watch",
+    "build": "cross-env NODE_ENV=production webpack",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
