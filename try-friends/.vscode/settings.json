@@ -1,3 +1,14 @@
 {
-  "terminal.integrated.cwd": "src"
+  "terminal.integrated.cwd": "src",
+  "tslint.alwaysShowRuleFailuresAsWarnings": true,
+  "tslint.autoFixOnSave": true,
+  "tslint.configFile": "./src/tsconfig.js",
+  "typescript.format.insertSpaceAfterConstructor": true,
+  "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "[javascript]": {
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.formatOnSave": true
+  }
 }
