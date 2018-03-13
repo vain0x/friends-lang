@@ -3,15 +3,18 @@
   "extends": [
     "tslint:recommended"
   ],
-  "jsRules": {},
   "rules": {
+    "semicolon": [
+      true,
+      "always"
+    ],
     "quotemark": [
       true,
-      "double"
+      "single"
     ],
-    "indent": [
-      true
-    ],
+    "max-classes-per-file": false,
+    "indent": true,
+    "space-before-function-paren": true,
     "interface-name": [
       false
     ],

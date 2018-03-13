@@ -1,2 +1,3 @@
-*/**
-!client/index.html
+**/*.js
+**/*.js.map
+**/*.hot-update.json

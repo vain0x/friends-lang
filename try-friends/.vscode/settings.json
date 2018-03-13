@@ -1,14 +1,48 @@
 {
   "terminal.integrated.cwd": "src",
-  "tslint.alwaysShowRuleFailuresAsWarnings": true,
-  "tslint.autoFixOnSave": true,
-  "tslint.configFile": "./src/tsconfig.js",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/*.orig": true,
+    "**/*.hot-update.js": true,
+    "**/*.hot-update.json": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "dist/**/*.js": true,
+    "dist/**/*.js.map": true,
+    "dist/**/*.css": true
+  },
+  "files.associations": {
+    "*.vue": "vue"
+  },
+  "javascript.format.insertSpaceAfterConstructor": true,
+  "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "eslint.autoFixOnSave": true,
+  "typescript.tsdk": "src/node_modules/typescript/lib",
   "typescript.format.insertSpaceAfterConstructor": true,
+  "typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": true,
   "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "tslint.configFile": "./src/tslint.json",
+  "tslint.autoFixOnSave": true,
+  "tslint.alwaysShowRuleFailuresAsWarnings": true,
+  "vetur.format.defaultFormatter.ts": "vscode-typescript",
+  "element-helper.language": "en-US",
+  "element-helper.version": "2.2",
   "[javascript]": {
     "editor.formatOnSave": true
   },
   "[typescript]": {
+    "editor.formatOnSave": true
+  },
+  "[vue]": {
+    "editor.formatOnSave": true,
+  },
+  "[scss]": {
     "editor.formatOnSave": true
   }
 }

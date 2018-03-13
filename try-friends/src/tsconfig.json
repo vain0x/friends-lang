@@ -11,7 +11,8 @@
       "es2015"
     ],
     "experimentalDecorators": true,
-    "strict": true
+    "strict": true,
+    "strictPropertyInitialization": false
   },
   "include": [
     "**/*.ts"

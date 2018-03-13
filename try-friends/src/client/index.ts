@@ -1,3 +1,3 @@
-import { message } from "../core/awesome";
+import { main } from './bootstrap';
 
-alert(message());
+main();
