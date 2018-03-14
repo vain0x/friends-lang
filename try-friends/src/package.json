@@ -11,6 +11,7 @@
     "watch": "run-p watch:*",
     "watch:webpack": "cross-env NODE_ENV=development webpack --watch",
     "watch:webpack-dev-server": "cross-env NODE_ENV=development webpack-dev-server --watch",
+    "watch:karma": "cross-env NODE_ENV=development karma start",
     "build": "cross-env NODE_ENV=production webpack",
     "test": "run-s test:build test:karma",
     "test:build": "cross-env NODE_ENV=development webpack",

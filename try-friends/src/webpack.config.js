@@ -5,11 +5,15 @@ const isProductionEnv = process.env.NODE_ENV === 'production';
 const isDevelopmentEnv = process.env.NODE_ENV == 'development';
 
 const config = {
-  entry: './client/index.ts',
+  entry: {
+    'client/index': './client/index.ts',
+    'client/index.spec': './client/index.spec.ts',
+    'core/index.spec': './core/index.spec.ts',
+  },
   output: {
-    path: path.resolve(__dirname, '../dist/client'),
+    path: path.resolve(__dirname, '../dist'),
     publicPath: '/',
-    filename: 'index.js',
+    filename: '[name].js',
   },
   module: {
     rules: [
