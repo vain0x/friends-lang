@@ -15,6 +15,7 @@
     "strictPropertyInitialization": false
   },
   "include": [
-    "**/*.ts"
+    "*.ts",
+    "**/*.ts",
   ]
 }

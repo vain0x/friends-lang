@@ -1,20 +1,26 @@
 // Karma configuration
 // Generated on Sun Mar 11 2018 19:00:32 GMT+0900 (JST)
 
-const webpackConfig = require("./webpack.config");
+// const webpackConfig = require('./webpack.config');
+
+// const testingWebpackConfig = Object.assign({}, webpackConfig, { entry: undefined, });
 
 module.exports = function (config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: '',
+    basePath: __dirname,
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha'],
+    frameworks: [
+      'mocha',
+      'karma-typescript',
+    ],
 
     // list of files / patterns to load in the browser
     files: [
+      '{client,server}/**.spec.ts',
     ],
 
     // list of files / patterns to exclude
@@ -24,12 +30,16 @@ module.exports = function (config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      '**/*.ts': 'karma-typescript',
     },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: [
+      'mocha',
+      'karma-typescript',
+    ],
 
     // web server port
     port: 9876,
@@ -54,6 +64,8 @@ module.exports = function (config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
-  })
-}
+    concurrency: Infinity,
+
+    // webpack: testingWebpackConfig,
+  });
+};

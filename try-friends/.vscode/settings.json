@@ -23,6 +23,9 @@
   "javascript.format.insertSpaceAfterConstructor": true,
   "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
   "eslint.autoFixOnSave": true,
+  "eslint.options": {
+    "c": "./src/.eslintrc.json",
+  },
   "typescript.tsdk": "src/node_modules/typescript/lib",
   "typescript.format.insertSpaceAfterConstructor": true,
   "typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": true,
