@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import { message } from '../core/awesome';
+import { Assertion, unitTests } from '../core/testing';
 import FrontPageComponent from './views/front-page-component.vue';
 import { registerComponents, routes, vueRouter } from './views/routing';
 
@@ -25,3 +26,13 @@ export const main = () => {
   setUpVueRouter();
   startApp();
 };
+
+/// #if TESTING
+unitTests((assert: Assertion) => {
+  describe('index', () => {
+    it('add', () => {
+      assert.strictEqual(1 + 2, 3);
+    });
+  });
+});
+/// #endif

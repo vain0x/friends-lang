@@ -18,7 +18,7 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /(\.js|\.ts)$/,
         exclude: /(node_modules|bower_components)/,
         use: [
           {
