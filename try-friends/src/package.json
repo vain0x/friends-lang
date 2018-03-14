@@ -14,7 +14,7 @@
     "build": "cross-env NODE_ENV=production webpack",
     "test": "run-s test:build test:karma",
     "test:build": "cross-env NODE_ENV=development webpack",
-    "test:karma": "cross-env NODE_ENV=development karma --single-run"
+    "test:karma": "cross-env NODE_ENV=development karma start --single-run"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,8 @@
   },
   "homepage": "https://github.com/vain0/try-friends#readme",
   "devDependencies": {
+    "@types/mocha": "^2.2.48",
+    "@types/node": "^9.4.7",
     "assert-diff": "^1.2.5",
     "chai": "^4.1.2",
     "cross-env": "^5.1.4",
@@ -35,11 +37,11 @@
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-eslint-plugin": "^1.4.0",
     "eslint-plugin-html": "^4.0.2",
-    "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-node": "^5.2.1",
-    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.7.0",
     "eslint-plugin-standard": "^3.0.1",
-    "eslint-plugin-vue": "^4.2.2",
+    "eslint-plugin-vue": "^4.3.0",
     "ifdef-loader": "^2.0.3",
     "karma": "^2.0.0",
     "karma-chrome-launcher": "^2.2.0",
@@ -59,17 +61,16 @@
     "tslint": "^5.9.1",
     "typescript": "^2.7.2",
     "url-loader": "^1.0.1",
-    "vue-cli": "^2.9.3",
-    "vue-loader": "^13.7.0",
+    "vue-loader": "^14.2.1",
     "vue-style-loader": "^4.0.2",
-    "vue-template-compiler": "^2.5.15",
+    "vue-template-compiler": "^2.5.16",
     "vue-ts-loader": "0.0.3",
-    "webpack": "^3.10.0",
+    "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.1"
   },
   "dependencies": {
-    "vue": "^2.5.7",
-    "vue-class-component": "^6.0.0",
+    "vue": "^2.5.16",
+    "vue-class-component": "^6.2.0",
     "vue-property-decorator": "^6.0.0",
     "vue-router": "^3.0.1"
   }
