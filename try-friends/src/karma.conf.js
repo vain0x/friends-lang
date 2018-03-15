@@ -1,11 +1,4 @@
-// Karma configuration
-// Generated on Sun Mar 11 2018 19:00:32 GMT+0900 (JST)
-
-// NOTE: Karma isn't aware of TypeScript/Vue.
-//       It just watches webpack's bundles for testing.
-
-// const webpackConfig = require('./webpack.config');
-// const testingWebpackConfig = Object.assign({}, webpackConfig, { entry: undefined });
+// Karma configuration.
 
 module.exports = function (config) {
   config.set({
@@ -17,13 +10,11 @@ module.exports = function (config) {
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: [
       'mocha',
-      // 'karma-typescript',
     ],
 
     // list of files / patterns to load in the browser
     files: [
       '../dist/{client,core,server}/index.spec.js',
-      // '{client,core,server}/**.ts',
     ],
 
     // list of files / patterns to exclude
@@ -33,7 +24,6 @@ module.exports = function (config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      // '**.spec.ts': ['webpack'],
     },
 
     // test results reporter to use
@@ -41,7 +31,6 @@ module.exports = function (config) {
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: [
       'mocha',
-      // 'karma-typescript',
     ],
 
     // web server port
@@ -70,11 +59,5 @@ module.exports = function (config) {
     // Concurrency level
     // how many browser should be started simultaneous
     concurrency: Infinity,
-
-    // mime: {
-    //   'text/x-typescript': ['ts', 'tsx'],
-    // },
-
-    // webpack: testingWebpackConfig,
   });
 };
