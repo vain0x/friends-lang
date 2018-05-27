@@ -21,3 +21,12 @@ A web app to try Friends-lang.
 - **Karma**: Unit test runner.
     - Executes test codes in a browser.
     - Is NOT aware of TypeScript/Vue/etc. Just watches webpack's bundles.
+
+## Notes for Development
+
+```sh
+# Start compiler and test tools in background.
+# Serve at http://127.0.0.1:5000 .
+
+npm run dev &
+```
