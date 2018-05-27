@@ -14,7 +14,7 @@
     ],
     "max-classes-per-file": false,
     "indent": true,
-    "space-before-function-paren": true,
+    "space-before-function-paren": false,
     "interface-name": [
       false
     ],

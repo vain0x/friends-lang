@@ -24,20 +24,20 @@ export default class FrontPageComponent extends Vue {
 
   private enthusiasm: number = this.initialEnthusiasm;
 
-  increment () {
+  increment() {
     this.enthusiasm++;
   }
 
-  decrement () {
+  decrement() {
     if (this.enthusiasm > 1) {
       this.enthusiasm--;
     }
   }
 
-  get exclamationMarks (): string {
+  get exclamationMarks(): string {
     return Array(this.enthusiasm + 1).join("!");
   }
-  get message () {
+  get message() {
     return message();
   }
 }

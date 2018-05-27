@@ -50,7 +50,7 @@ type R<X, U> = ParserResult<X, U>;
 type PF<X, U> = (c: C<U>) => [R<X, U>, C<U>];
 
 export class Parser<X, U> {
-  constructor (private readonly parseFn: PF<X, U>) {
+  constructor(private readonly parseFn: PF<X, U>) {
   }
 
   public map<Y>(f: (value: X) => Y): Parser<Y, U> {
@@ -91,7 +91,7 @@ export class Parser<X, U> {
     return this.and(second).map(([l, r]) => Object.assign(l, r));
   }
 
-  public many (): Parser<X[], U> {
+  public many(): Parser<X[], U> {
     return parser(context => {
       let current = context;
       const xs: X[] = [];
@@ -109,14 +109,14 @@ export class Parser<X, U> {
     });
   }
 
-  public attempt (): Parser<X, U> {
+  public attempt(): Parser<X, U> {
     return parser(context => {
       const [r, next] = this.parse(context);
       return [r, { ...next, cut: false }];
     });
   }
 
-  public parse (context: C<U>): [R<X, U>, C<U>] {
+  public parse(context: C<U>): [R<X, U>, C<U>] {
     return this.parseFn(context);
   }
 }
