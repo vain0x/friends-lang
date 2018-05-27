@@ -1,0 +1,41 @@
+import { None, Option, Some } from './option';
+import { choice, endOfInput, expect, parse, Parser, parser } from './parser-combinator';
+
+const singleSpaceP =
+  choice([
+    expect(' '),
+    expect('　'),
+  ].map(p => p.attempt()));
+
+const blankP = singleSpaceP.many().map(_ => None);
+
+const blank1P = singleSpaceP.andR(blankP);
+
+const hagamoP = expect('は');
+
+const termP = expect('あなた');
+
+const subjectP = termP.map(t => ({ subject: t }));
+
+const predicateP = expect('定命の').map(p => ({ predicate: p }));
+
+const sugoiP =
+  blankP
+    .andR(expect('すごーい！')).attempt().andL(blank1P)
+    .andR(subjectP).andL(blank1P)
+    .andL(hagamoP).andL(blank1P)
+    .andA(predicateP).andL(blank1P)
+    .andL(expect('フレンズ')).andL(blankP)
+    .andL(expect('なんだね！'))
+    .andL(blankP)
+    .andL(endOfInput());
+
+export const tryParse = (source: string) => {
+  const r = parse({ source, u: 0, parser: sugoiP });
+  if (!r.ok) {
+    const { source: { lines }, message, pos: { line, column } } = r.error;
+    const near = lines[line].substring(0, column);
+    throw new Error(`Parse Error:\n${message}\nAt ${1 + line} line, ${1 + column} column, near '${near}'`);
+  }
+  return r.value;
+};
