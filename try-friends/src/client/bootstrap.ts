@@ -27,6 +27,7 @@ export const main = () => {
   startApp();
 };
 
+/*
 /// #if TESTING
 unitTests((assert: Assertion) => {
   describe('index', () => {
@@ -36,3 +37,4 @@ unitTests((assert: Assertion) => {
   });
 });
 /// #endif
+*/
