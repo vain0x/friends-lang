@@ -20,18 +20,35 @@ const subjectP = termP.map(t => ({ subject: t }));
 const predicateP = expect('定命の').map(p => ({ predicate: p }));
 
 const sugoiP =
-  blankP
-    .andR(expect('すごーい！')).attempt().andL(blank1P)
+  expect('すごーい！').attempt().andL(blank1P)
     .andR(subjectP).andL(blank1P)
     .andL(hagamoP).andL(blank1P)
     .andA(predicateP).andL(blank1P)
     .andL(expect('フレンズ')).andL(blankP)
-    .andL(expect('なんだね！'))
+    .andL(expect('なんだね！')).andL(blankP)
+    .map(x => Object.assign({}, x, { type: 'sugoi' }))
+  ;
+
+const nandakkeP =
+  subjectP.andL(blank1P)
+    .andL(hagamoP).andL(blank1P).attempt()
+    .andA(predicateP).andL(blank1P)
+    .andL(expect('フレンズ')).andL(blankP)
+    .andL(expect('なんだっけ？')).andL(blankP)
+    .map(x => Object.assign({}, x, { type: 'nandakke' }))
+  ;
+
+const statementP =
+  blankP
+    .andR(choice([
+      sugoiP,
+      nandakkeP,
+    ]))
     .andL(blankP)
     .andL(endOfInput());
 
 export const tryParse = (source: string) => {
-  const r = parse({ source, u: 0, parser: sugoiP });
+  const r = parse({ source, u: 0, parser: statementP });
   if (!r.ok) {
     const { source: { lines }, message, pos: { line, column } } = r.error;
     const near = lines[line].substring(0, column);

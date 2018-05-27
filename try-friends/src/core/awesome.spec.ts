@@ -10,6 +10,10 @@ describe('awesome', () => {
 
 describe('parsing', () => {
   it('can parse sugoi statement', () => {
-    assert.deepEqual({ subject: 'あなた', predicate: '定命の' }, tryParse('すごーい！ あなた は 定命の フレンズ なんだね！ '));
+    assert.deepEqual({ type: 'sugoi', subject: 'あなた', predicate: '定命の' }, tryParse('すごーい！ あなた は 定命の フレンズ なんだね！ '));
+  });
+
+  it('can parse nandakke statement', () => {
+    assert.deepEqual({ type: 'nandakke', subject: 'あなた', predicate: '定命の' }, tryParse('あなた は 定命の フレンズ なんだっけ？ '));
   });
 });
