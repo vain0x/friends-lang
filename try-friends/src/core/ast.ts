@@ -12,29 +12,26 @@ export type Pred = string;
  */
 export type Atom = string;
 
+export type VarId = number;
+
 /**
  * Variable: a symbol to unify.
  */
 export interface Var {
-  varId: number;
+  varId: VarId;
   varName: string;
 }
-
-export type TermTag =
-  'var_term'
-  | 'atom_term'
-  | 'app_term'
-  ;
 
 /**
  * Term: an expression to represent an object.
  */
-export interface Term {
-  tag: TermTag;
-}
+export type Term =
+  | VarTerm
+  | AtomTerm
+  | AppTerm
+  ;
 
 export interface VarTerm {
-  tag: 'var_term';
   var: Var;
 }
 
@@ -42,42 +39,38 @@ export interface VarTerm {
  * Atom: a constant.
  */
 export interface AtomTerm {
-  tag: 'atom_term';
   atom: Atom;
 }
+
+export const nilTerm = {
+  atom: 'nil',
+};
 
 /**
  * Application term: a node to compose atoms and variables into one term.
  */
 export interface AppTerm {
-  tag: 'app_term';
-  atom: Atom;
-  term: Term;
+  f: Atom;
+  x: Term;
 }
-
-export type PropTag =
-  'atomic_prop'
-  | 'cut_prop'
-  | 'and_prop'
-  ;
 
 /**
  * Proposition: an expression to represent a statement.
  */
-export interface Prop {
-  tag: PropTag;
-}
+export type Prop =
+  | PredProp
+  | ConjProp
+  ;
 
 /**
  * Proposition which consists of a predicate.
  */
 export interface PredProp {
-  tag: 'atomic_prop';
   pred: Pred;
+  term: Term;
 }
 
-export interface AndProp {
-  tag: 'and_prop';
+export interface ConjProp {
   left: Prop;
   right: Prop;
 }
@@ -86,33 +79,36 @@ export interface AndProp {
 /**
  * '!' operator.
  */
-export interface CutProp {
-  tag: 'cut_prop';
-}
+export const CutProp: PredProp = {
+  pred: '!',
+  term: nilTerm,
+};
+
+export const TrueProp: PredProp = {
+  pred: 'true',
+  term: nilTerm,
+};
 
 /**
  * Rule: an axiom or inference rule that we consider is true with no thought.
  */
 export interface Rule {
-  head: Pred;
-  body: Prop | undefined;
+  /**
+   * An atomic proposition that we can consider is true if the goal is true.
+   */
+  head: PredProp;
+
+  /**
+   * Goal: one of propositions to let the head be true.
+   */
+  goal?: Prop | undefined;
 }
 
-export type StatementTag =
-  'rule_statement'
-  | 'query_statement'
+export type Statement =
+  | Rule
+  | Query
   ;
 
-export interface Statement {
-  tag: StatementTag;
-}
-
-export interface RuleStatement {
-  tag: 'rule_statement';
-  rule: Rule;
-}
-
-export interface QueryStatement {
-  tag: 'query_statement';
-  prop: Prop;
+export interface Query {
+  query: Prop;
 }
