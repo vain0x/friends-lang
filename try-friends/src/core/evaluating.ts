@@ -16,12 +16,7 @@ import {
   VarTerm,
 } from './ast';
 import { flatMap } from './iterable';
-
-const todo = (): never => {
-  throw new Error('Not implemented.');
-};
-
-const exhaust = (value: never): never => value;
+import { exhaust } from './util';
 
 const nextVarId = (() => {
   let count = 0;
