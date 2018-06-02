@@ -291,9 +291,6 @@ export function* query(prop: Prop, globalEnv: Env, globalKnowledge: Knowledge): 
     const solution: Solution = [];
     for (const v of vars) {
       const term = Env.substitute(localEnv, { var: v });
-      if (term === undefined) {
-        continue;
-      }
       const assignment = {
         varName: v.varName,
         term,
