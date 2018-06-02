@@ -13,7 +13,7 @@ export const routes = [
     component: Vue.extend({
       template: `
         <article>
-          <h2>About.</h2>
+          <h2>About</h2>
           <p>
             <strong>Friends-lang</strong> is a programming language.
           </p>
