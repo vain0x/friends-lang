@@ -1,6 +1,8 @@
 import {
   AppTerm,
   CutProp,
+  Env,
+  Knowledge,
   nilTerm,
   Pred,
   PredProp,
@@ -108,10 +110,6 @@ const Rule = {
   },
 };
 
-interface Knowledge {
-  [predName: string]: Rule[] | undefined;
-}
-
 const Knowledge = {
   default() {
     return {};
@@ -139,12 +137,6 @@ const Knowledge = {
     return knowledge[predName] || [];
   },
 };
-
-interface Env {
-  [varName: string]: {
-    [varId: number]: Term | undefined;
-  } | undefined;
-}
 
 const Env = {
   default() {

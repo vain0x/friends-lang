@@ -114,6 +114,22 @@ export interface Query {
 }
 
 /**
+ * Knowledge: a set of inference rules to be added to the proof system.
+ */
+export interface Knowledge {
+  [predName: string]: Rule[] | undefined;
+}
+
+/**
+ * Env: a set of bindings.
+ */
+export interface Env {
+  [varName: string]: {
+    [varId: number]: Term | undefined;
+  } | undefined;
+}
+
+/**
  * One of assignments that let the query be true. Variables occur in given order.
  */
 export type Solution = Array<{
