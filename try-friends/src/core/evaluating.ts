@@ -16,6 +16,7 @@ import {
   VarTerm,
 } from './ast';
 import { flatMap } from './iterable';
+import { TestSuite } from './testing-types';
 import { exhaust } from './util';
 
 const nextVarId = (() => {
@@ -309,14 +310,7 @@ export function* query(prop: Prop, globalEnv: Env, globalKnowledge: Knowledge): 
 // Unit Testing
 // -------------------------------------------------------------
 
-export interface TestTools {
-  describe: (description: string, body: (this: void) => void) => void;
-  context: (description: string, body: (this: void) => void) => void;
-  it: (description: string, body: (this: void) => void) => void;
-  eq: <T>(actual: T, expected: T) => void;
-}
-
-export const tests = ({ describe, context, it, eq }: TestTools) => {
+export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
   const free = (varName: string): VarTerm => ({ var: { varId: -1, varName } });
   const x = free('x');
   const y = free('y');

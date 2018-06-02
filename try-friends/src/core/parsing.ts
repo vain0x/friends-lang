@@ -1,5 +1,6 @@
 import { None, Option, Some } from './option';
 import { choice, endOfInput, expect, parse, Parser, parser } from './parser-combinator';
+import { TestSuite } from './testing-types';
 
 const singleSpaceP =
   choice([
@@ -55,4 +56,14 @@ export const tryParse = (source: string) => {
     throw new Error(`Parse Error:\n${message}\nAt ${1 + line} line, ${1 + column} column, near '${near}'`);
   }
   return r.value;
+};
+
+export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
+  it('can parse sugoi statement', () => {
+    eq({ type: 'sugoi', subject: 'あなた', predicate: '定命の' }, tryParse('すごーい！ あなた は 定命の フレンズ なんだね！ '));
+  });
+
+  it('can parse nandakke statement', () => {
+    eq({ type: 'nandakke', subject: 'あなた', predicate: '定命の' }, tryParse('あなた は 定命の フレンズ なんだっけ？ '));
+  });
 };
