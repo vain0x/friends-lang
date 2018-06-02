@@ -1,4 +1,18 @@
-import { AppTerm, CutProp, nilTerm, Pred, PredProp, Prop, Rule, Term, TrueProp, Var, VarId, VarTerm } from './ast';
+import {
+  AppTerm,
+  CutProp,
+  nilTerm,
+  Pred,
+  PredProp,
+  Prop,
+  Rule,
+  Solution,
+  Term,
+  TrueProp,
+  Var,
+  VarId,
+  VarTerm,
+} from './ast';
 import { flatMap } from './iterable';
 
 const todo = (): never => {
@@ -209,11 +223,6 @@ const Env = {
   })(),
 };
 
-type Solution = Array<{
-  varName: string,
-  term: Term,
-}>;
-
 interface ProveResult {
   env: Env;
   cut: boolean;
@@ -289,7 +298,7 @@ const prove = (() => {
 
 const distinct = <X>(xs: X[]): X[] => xs;
 
-function* query(prop: Prop, globalEnv: Env, globalKnowledge: Knowledge): Iterable<Solution> {
+export function* query(prop: Prop, globalEnv: Env, globalKnowledge: Knowledge): Iterable<Solution> {
   prop = Prop.refresh(prop);
   const vars = distinct(Prop.vars(prop));
   for (const localEnv of prove(prop, globalEnv, globalKnowledge)) {

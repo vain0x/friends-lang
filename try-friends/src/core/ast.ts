@@ -112,3 +112,11 @@ export type Statement =
 export interface Query {
   query: Prop;
 }
+
+/**
+ * One of assignments that let the query be true. Variables occur in given order.
+ */
+export type Solution = Array<{
+  varName: string,
+  term: Term,
+}>;
