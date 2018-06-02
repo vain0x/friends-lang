@@ -15,7 +15,7 @@ import {
   VarId,
   VarTerm,
 } from './ast';
-import { flatMap } from './iterable';
+import { distinct, flatMap } from './iterable';
 import { TestSuite } from './testing-types';
 import { exhaust } from './util';
 
@@ -284,11 +284,9 @@ const prove = (() => {
   return proveCore;
 })();
 
-const distinct = <X>(xs: X[]): X[] => xs;
-
 export function* query(prop: Prop, globalEnv: Env, globalKnowledge: Knowledge): Iterable<Solution> {
   prop = Prop.refresh(prop);
-  const vars = distinct(Prop.vars(prop));
+  const vars = [...distinct(Prop.vars(prop))];
   for (const localEnv of prove(prop, globalEnv, globalKnowledge)) {
     const solution: Solution = [];
     for (const v of vars) {
