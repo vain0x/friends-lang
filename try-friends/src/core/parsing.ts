@@ -1,15 +1,9 @@
 import { None, Option, Some } from './option';
-import { choice, endOfInput, expect, parse, Parser, parser } from './parser-combinator';
+import { choice, endOfInput, expect, parse, Parser, parser, spaceP } from './parser-combinator';
 import { TestSuite } from './testing-types';
 
-const choiceWordP = (words: Iterable<string>) =>
-  choice([...words].map(word => expect(word).attempt()));
-
-const singleSpaceP = choiceWordP([' ', '\t', '\n', '\r', '　']);
-
-const blankP = singleSpaceP.many().map(_ => None);
-
-const blank1P = singleSpaceP.andR(blankP);
+const blankP = spaceP();
+const blank1P = blankP.nonempty();
 
 const hagamoP = expect('は');
 
@@ -20,7 +14,7 @@ const subjectP = termP.map(t => ({ subject: t }));
 const predicateP = expect('定命の').map(p => ({ predicate: p }));
 
 const ruleStatementP =
-  expect('すごーい！').attempt().andL(blank1P)
+  expect('すごーい！').attempt().andR(blankP)
     .andR(subjectP).andL(blank1P)
     .andL(hagamoP).andL(blank1P)
     .andA(predicateP).andL(blank1P)
@@ -59,10 +53,10 @@ export const tryParse = (source: string) => {
 
 export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
   it('can parse rule statement', () => {
-    eq({ type: 'rule', subject: 'あなた', predicate: '定命の' }, tryParse('すごーい！ あなた は 定命の フレンズ なんだね！ '));
+    eq({ type: 'rule', subject: 'あなた', predicate: '定命の' }, tryParse('すごーい！ あなた は 定命の フレンズ なんだね！'));
   });
 
   it('can parse query statement', () => {
-    eq({ type: 'query', subject: 'あなた', predicate: '定命の' }, tryParse('あなた は 定命の フレンズ なんですか？ '));
+    eq({ type: 'query', subject: 'あなた', predicate: '定命の' }, tryParse('あなた　は\r\n\t定命の フレンズ なんですか？ '));
   });
 };

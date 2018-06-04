@@ -1,5 +1,6 @@
 // Parser combinator.
 
+import { ok as assertOk } from 'assert';
 import { None, Option, Some } from './option';
 
 export interface Source {
@@ -63,6 +64,10 @@ export class Parser<X, U> {
     });
   }
 
+  public discard(): Parser<None, U> {
+    return this.map(_ => None);
+  }
+
   public and<Y>(second: Parser<Y, U>): Parser<[X, Y], U> {
     return parser(context => {
       const [r1, c1] = this.parse(context);
@@ -113,6 +118,16 @@ export class Parser<X, U> {
     return parser(context => {
       const [r, next] = this.parse(context);
       return [r, { ...next, cut: false }];
+    });
+  }
+
+  public nonempty(): Parser<X, U> {
+    return parser(context => {
+      const [r, next] = this.parse(context);
+      if (r.ok && next.pos.index === context.pos.index) {
+        return failure('Expected any character is consumed here.', context);
+      }
+      return [r, next];
     });
   }
 
@@ -267,4 +282,29 @@ export const seq = <X, U>(ps: Array<P<X, U>>): P<X[], U> => parser(context => {
   }
 
   return success(xs, current);
+});
+
+export const spaceP = <U>(): P<None, U> => parser(context => {
+  const { source: { str }, pos: { index: startIndex } } = context;
+  const PART = 8;
+  let index = startIndex;
+
+  while (true) {
+    const near = str.substring(index, index + PART);
+    const ms = near.match(/^\s*/);
+    if (ms === null || ms.length === 0) {
+      break;
+    }
+
+    const length = ms[0].length;
+    index += length;
+
+    if (length < PART) {
+      break;
+    }
+
+    break;
+  }
+
+  return success(None, advance(index - startIndex, context));
 });
