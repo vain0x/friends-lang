@@ -2,11 +2,10 @@ import { None, Option, Some } from './option';
 import { choice, endOfInput, expect, parse, Parser, parser } from './parser-combinator';
 import { TestSuite } from './testing-types';
 
-const singleSpaceP =
-  choice([
-    expect(' '),
-    expect('　'),
-  ].map(p => p.attempt()));
+const choiceWordP = (words: Iterable<string>) =>
+  choice([...words].map(word => expect(word).attempt()));
+
+const singleSpaceP = choiceWordP([' ', '\t', '\n', '\r', '　']);
 
 const blankP = singleSpaceP.many().map(_ => None);
 
