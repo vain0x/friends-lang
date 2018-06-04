@@ -20,30 +20,30 @@ const subjectP = termP.map(t => ({ subject: t }));
 
 const predicateP = expect('定命の').map(p => ({ predicate: p }));
 
-const sugoiP =
+const ruleStatementP =
   expect('すごーい！').attempt().andL(blank1P)
     .andR(subjectP).andL(blank1P)
     .andL(hagamoP).andL(blank1P)
     .andA(predicateP).andL(blank1P)
     .andL(expect('フレンズ')).andL(blankP)
     .andL(expect('なんだね！')).andL(blankP)
-    .map(x => Object.assign({}, x, { type: 'sugoi' }))
+    .map(x => Object.assign({}, x, { type: 'rule' }))
   ;
 
-const nandakkeP =
+const queryStatementP =
   subjectP.andL(blank1P)
     .andL(hagamoP).andL(blank1P).attempt()
     .andA(predicateP).andL(blank1P)
     .andL(expect('フレンズ')).andL(blankP)
-    .andL(expect('なんだっけ？')).andL(blankP)
-    .map(x => Object.assign({}, x, { type: 'nandakke' }))
+    .andL(expect('なんですか？')).andL(blankP)
+    .map(x => Object.assign({}, x, { type: 'query' }))
   ;
 
 const statementP =
   blankP
     .andR(choice([
-      sugoiP,
-      nandakkeP,
+      ruleStatementP,
+      queryStatementP,
     ]))
     .andL(blankP)
     .andL(endOfInput());
@@ -59,11 +59,11 @@ export const tryParse = (source: string) => {
 };
 
 export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
-  it('can parse sugoi statement', () => {
-    eq({ type: 'sugoi', subject: 'あなた', predicate: '定命の' }, tryParse('すごーい！ あなた は 定命の フレンズ なんだね！ '));
+  it('can parse rule statement', () => {
+    eq({ type: 'rule', subject: 'あなた', predicate: '定命の' }, tryParse('すごーい！ あなた は 定命の フレンズ なんだね！ '));
   });
 
-  it('can parse nandakke statement', () => {
-    eq({ type: 'nandakke', subject: 'あなた', predicate: '定命の' }, tryParse('あなた は 定命の フレンズ なんだっけ？ '));
+  it('can parse query statement', () => {
+    eq({ type: 'query', subject: 'あなた', predicate: '定命の' }, tryParse('あなた は 定命の フレンズ なんですか？ '));
   });
 };
