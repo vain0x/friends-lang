@@ -1,5 +1,5 @@
 import { None, Option, Some } from './option';
-import { choice, endOfInput, expect, parse, Parser, parser, spaceP } from './parser-combinator';
+import { choice, endOfInput, expect, parse, Parser, parser, spaceP, wordP } from './parser-combinator';
 import { TestSuite } from './testing-types';
 
 const blankP = spaceP();
@@ -7,7 +7,7 @@ const blank1P = blankP.nonempty();
 
 const hagamoP = expect('は');
 
-const termP = expect('あなた');
+const termP = wordP();
 
 const subjectP = termP.map(t => ({ subject: t }));
 
@@ -57,6 +57,6 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
   });
 
   it('can parse query statement', () => {
-    eq({ type: 'query', subject: 'あなた', predicate: '定命の' }, tryParse('あなた　は\r\n\t定命の フレンズ なんですか？ '));
+    eq({ type: 'query', subject: 'ソクラテスさん', predicate: '定命の' }, tryParse('ソクラテスさん　は\r\n\t定命の フレンズ なんですか？ '));
   });
 };

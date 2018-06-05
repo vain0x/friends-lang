@@ -308,3 +308,15 @@ export const spaceP = <U>(): P<None, U> => parser(context => {
 
   return success(None, advance(index - startIndex, context));
 });
+
+export const wordP = <U>(): P<string, U> => parser(context => {
+  const { source: { lines }, pos: { line, column } } = context;
+  const near = lines[line].substring(column);
+  const ms = near.match(/^[\w\d_あ-んア-ン]+/); // FIXME: Should Hakase recognize Kanjis?
+  if (ms === null || ms.length === 0) {
+    return failure('Expected a word.', context);
+  }
+
+  const word = ms[0];
+  return success(word, advance(word.length, context));
+});
