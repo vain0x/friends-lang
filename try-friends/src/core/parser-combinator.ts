@@ -320,3 +320,10 @@ export const wordP = <U>(): P<string, U> => parser(context => {
   const word = ms[0];
   return success(word, advance(word.length, context));
 });
+
+export const recursiveP = <T, U>(): [P<T, U>, (p: P<T, U>) => void] => {
+  let inner: P<T, U>;
+  const set = (p: P<T, U>) => { inner = p; };
+  const proxy = parser<T, U>(context => inner.parse(context));
+  return [proxy, set];
+};

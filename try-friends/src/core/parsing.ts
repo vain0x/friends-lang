@@ -1,13 +1,34 @@
+import { AtomTerm, Term, VarTerm } from './ast';
 import { None, Option, Some } from './option';
-import { choice, endOfInput, expect, parse, Parser, parser, spaceP, wordP } from './parser-combinator';
+import { choice, endOfInput, expect, parse, Parser, parser, recursiveP, spaceP, wordP } from './parser-combinator';
 import { TestSuite } from './testing-types';
 
 const blankP = spaceP();
 const blank1P = blankP.nonempty();
+const identP = wordP();
 
 const hagamoP = expect('は');
 
-const termP = wordP();
+const varIdents = new Set([
+  'あなた', 'きみ', 'かれ', 'かのじょ', 'だれ',
+  'なに', 'あれ', 'これ', 'これら', 'それ', 'それら',
+]);
+
+const varOrAtomP: Parser<VarTerm | AtomTerm, {}> = identP.map(word => {
+  if (word.startsWith('_') || varIdents.has(word)) {
+    return { var: { varName: word, varId: -1 } };
+  } else {
+    return { atom: word };
+  }
+});
+
+const [termP, initTermP] = recursiveP<Term, {}>();
+
+initTermP(
+  choice([
+    expect('「').attempt().andR(blankP).andR(termP).andL(blankP).andL(expect('」')),
+    varOrAtomP,
+  ]));
 
 const subjectP = termP.map(t => ({ subject: t }));
 
@@ -53,10 +74,22 @@ export const tryParse = (source: string) => {
 
 export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
   it('can parse rule statement', () => {
-    eq({ type: 'rule', subject: 'あなた', predicate: '定命の' }, tryParse('すごーい！ あなた は 定命の フレンズ なんだね！'));
+    eq(
+      { type: 'rule', subject: { var: { varName: 'あなた', varId: -1 } }, predicate: '定命の' },
+      tryParse('すごーい！ あなた は 定命の フレンズ なんだね！'),
+    );
+  });
+  it('can parse group term', () => {
+    eq(
+      { type: 'rule', subject: { atom: 'ソクラテスさん' }, predicate: '定命の' },
+      tryParse('すごーい！ 「「 ソクラテスさん 」」 は 定命の フレンズ なんだね！'),
+    );
   });
 
   it('can parse query statement', () => {
-    eq({ type: 'query', subject: 'ソクラテスさん', predicate: '定命の' }, tryParse('ソクラテスさん　は\r\n\t定命の フレンズ なんですか？ '));
+    eq(
+      { type: 'query', subject: { atom: 'ソクラテスさん' }, predicate: '定命の' },
+      tryParse('ソクラテスさん　は\r\n\t定命の フレンズ なんですか？ '),
+    );
   });
 };
