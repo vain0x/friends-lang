@@ -162,17 +162,33 @@ const parse = (source: string): Statement => {
 };
 
 export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
-  it('can parse rule', () => {
+  it('can parse axiom', () => {
     eq(
       { head: { term: { var: { varName: 'あなた', varId: -1 } }, pred: '定命の' } },
       parse('すごーい！ あなた は 定命の フレンズ なんだね！'),
     );
   });
 
+  it('can parse inference rule', () => {
+    eq(
+      {
+        head: {
+          term: { var: { varName: 'あなた', varId: -1 } },
+          pred: '定命の',
+        },
+        goal: {
+          term: { var: { varName: 'あなた', varId: -1 } },
+          pred: '人間の',
+        },
+      },
+      parse('すごーい！ あなた が 人間の フレンズ なら あなた は 定命の フレンズ なんだね！'),
+    );
+  });
+
   it('can parse group term', () => {
     eq(
-      { head: { term: { atom: 'ソクラテスさん' }, pred: '定命の' } },
-      parse('すごーい！ 「「 ソクラテスさん 」」 は 定命の フレンズ なんだね！'),
+      { head: { term: { atom: 'ソクラテスさん' }, pred: '人間の' } },
+      parse('すごーい！ 「「 ソクラテスさん 」」 は 人間の フレンズ なんだね！'),
     );
   });
 
