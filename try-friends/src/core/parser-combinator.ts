@@ -1,6 +1,5 @@
 // Parser combinator.
 
-import { ok as assertOk } from 'assert';
 import { None, Option, Some } from './option';
 
 export interface Source {
@@ -75,11 +74,11 @@ export class Parser<X, U> {
     });
   }
 
-  public filter(f: (value: X) => boolean, message: string): Parser<X, U> {
+  public filter(f: (value: X) => boolean, label: string): Parser<X, U> {
     return parser(context => {
       const [r, c] = this.parse(context);
       if (r.ok && !f(r.value)) {
-        return failure(message, context);
+        return failure(label, context);
       }
       return [r, c];
     });
@@ -114,7 +113,7 @@ export class Parser<X, U> {
   }
 
   public andA<Y>(second: Parser<Y, U>): Parser<X & Y, U> {
-    return this.and(second).map(([l, r]) => Object.assign(l, r));
+    return this.and(second).map(([l, r]) => Object.assign({}, l, r));
   }
 
   public many(): Parser<X[], U> {
@@ -249,10 +248,10 @@ export const successP = <T, U>(value: T): P<T, U> => parser(context => {
   return success(value, context);
 });
 
-export const endOfInput = <U>(): P<None, U> => parser(context => {
+export const endOfInputP = <U>(): P<None, U> => parser(context => {
   const { source: { str }, pos: { index } } = context;
   if (index < str.length) {
-    return failure('end of input', context);
+    return failure('終端', context);
   } else {
     return success(None, context);
   }
@@ -279,6 +278,7 @@ export const choice = <X, U>(ps: Array<P<X, U>>): P<X, U> => parser(context => {
     if (r.ok) {
       return [r, { ...next, cut: true }];
     }
+
     es.push(r.error);
 
     if (next.cut) {
@@ -286,24 +286,7 @@ export const choice = <X, U>(ps: Array<P<X, U>>): P<X, U> => parser(context => {
     }
   }
 
-  return failure('either', context, es);
-});
-
-export const seq = <X, U>(ps: Array<P<X, U>>): P<X[], U> => parser(context => {
-  const xs: X[] = [];
-  let current = context;
-
-  for (const p of ps) {
-    const [r, next] = p.parse(current);
-    if (!r.ok) {
-      return [r, next];
-    }
-
-    xs.push(r.value);
-    current = next;
-  }
-
-  return success(xs, current);
+  return failure('いずれか', context, es);
 });
 
 const regexpP = <U>(matcher: RegExp) => parser<string, U>(context => {
@@ -336,4 +319,18 @@ export const recursiveP = <T, U>(): [P<T, U>, (p: P<T, U>) => void] => {
   const set = (p: P<T, U>) => { inner = p; };
   const proxy = parser<T, U>(context => inner.parse(context));
   return [proxy, set];
+};
+
+export const makeErrorMessage = (error: ParserError<{}>): string[] => {
+  const { label, source: { lines }, pos: { line, column }, children } = error;
+  const near = lines[line].substring(column - 4, column + 4);
+  const ls = [
+    `${label} ${1 + line}行目 ${1 + column}文字目《${near}》付近`,
+  ];
+  for (const c of children) {
+    for (const l of makeErrorMessage(c)) {
+      ls.push('    ' + l);
+    }
+  }
+  return ls;
 };
