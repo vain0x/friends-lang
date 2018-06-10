@@ -145,12 +145,20 @@ const allP = <X>(p: Parser<X>): Parser<X> =>
 
 initTermP(makeTermP());
 
-export const parse = (source: string): Statement => {
+const tryParse = (source: string): Statement | { err: string } => {
   const r = runParser({ source, parser: allP(statementP) });
   if (!r.ok) {
-    throw new Error(`文法的に間違いがあります:\n${makeErrorMessage(r.error).join('\n')}`);
+    return { err: `文法的に間違いがあります:\n${makeErrorMessage(r.error).join('\n')}` };
   }
   return r.value;
+};
+
+const parse = (source: string): Statement => {
+  const r = tryParse(source);
+  if ('err' in r) {
+    throw new Error(r.err);
+  }
+  return r;
 };
 
 export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
