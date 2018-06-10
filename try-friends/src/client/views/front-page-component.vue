@@ -2,6 +2,11 @@
   <article class="friends-repl">
     <h2>Try Friends-lang</h2>
 
+    <pre>
+例: あなた は 定命の フレンズ なんですか？
+例: ソクラテスさん は 定命の フレンズ なんですか？
+    </pre>
+
     <form>
       <textarea
         class="friends-repl-editor friends-repl-panel"
@@ -31,7 +36,24 @@
         >No</button>
       </form>
 
-      <div class="friends-repl-solution friends-repl-panel">{{ assignment }}</div>
+      <div
+        class="friends-repl-solution friends-repl-panel"
+      >{{ assignment }}</div>
+
+      <div
+        v-if="errorMessage !== ''"
+        class="friends-repl-error friends-repl-panel"
+      >{{ errorMessage }}</div>
+
+      <h4>知識: </h4>
+
+      <ol>
+        <li
+          v-for="s in statements"
+          :key="s.id"
+        >{{s.content}}
+        </li>
+      </ol>
     </section>
   </article>
 </template>
@@ -91,7 +113,13 @@ body {
 <script lang="ts">
 import { Vue, Component, Prop } from "vue-property-decorator";
 import { message } from "../../core/awesome";
+import { Solution, Repl, Logger } from "../../core/ast";
+import { createFriendsLangRepl } from "../../core/repl";
+import { exhaust } from "../../core/util";
 
+const emptyIterator = () => [][Symbol.iterator]();
+
+const prettyJsonify = <T>(value: T) => JSON.stringify(value, undefined, 2);
 
 class ConsoleLogger implements Logger {
   debug(value: {}): void {
@@ -107,27 +135,66 @@ export default class FrontPageComponent extends Vue {
   @Prop() initialEnthusiasm: number;
 
   private assignment: string = "No results.";
-  private query: string = "すごーい！ あなたは 定命の フレンズ なんだね！";
-  private iter: Iterator<object> = [{}][Symbol.iterator]();
+  private statements: { id: number, content: string }[] = [];
+  private query: string = "すごーい！ あなた は 定命の フレンズ なんだね！";
+  private iter: Iterator<Solution> = emptyIterator();
+  private errorMessage: string = "";
+  private repl: Repl = createFriendsLangRepl(logger);
 
   onAsk() {
-    console.debug("onAsk");
-    this.iter = this.query.split(" ").map(x => ({ x }))[Symbol.iterator]();
+    logger.debug("onAsk");
 
-    this.onNo();
+    if (this.query.trim() === "") {
+      return;
+    }
+
+    const r = this.repl.input(this.query);
+    if ("err" in r) {
+      this.errorMessage = r.err;
+      return;
+    } else if ("accepted" in r) {
+      this.errorMessage = "";
+      const id = this.statements.length;
+      const content = this.query.trim();
+      this.statements = [...this.statements, { id, content }];
+      return;
+    } else if ("solutions" in r) {
+      this.errorMessage = "";
+      this.iter = r.solutions[Symbol.iterator]();
+      this.onNo();
+      return;
+    } else {
+      return exhaust(r);
+    }
   }
 
   onYes() {
     console.debug("onYes");
+    this.iter = emptyIterator();
+    this.errorMessage = "このくらいは朝飯前なのです";
   }
 
   onNo() {
     console.debug("onNo");
+
     const result = this.iter.next();
+    logger.debug({ result });
+
     if (result.done) {
-      this.assignment = "No results.";
+      this.assignment = "";
+      this.errorMessage = "解なしなのです";
+      return;
+    }
+
+    const solution = result.value;
+    if (solution.length === 0) {
+      this.assignment = "";
+      this.errorMessage = "そのようですね"
     } else {
-      this.assignment = JSON.stringify(result.value, undefined, 2);
+      this.assignment = [
+        ...solution.map(({ varName, term }) => `${varName} は ${prettyJsonify(term)} 、`),
+        "なのです",
+      ].join("\n");
     }
   }
 }
