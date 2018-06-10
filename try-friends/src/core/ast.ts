@@ -136,3 +136,20 @@ export type Solution = Array<{
   varName: string,
   term: Term,
 }>;
+
+export interface ProofSystem {
+  assume(rule: Rule): ProofSystem;
+  query(query: Query): Iterable<Solution>;
+}
+
+export interface LangParser {
+  parse(source: string): Statement | { err: string };
+}
+
+export interface Repl {
+  input(source: string): { accepted: true } | { solutions: Iterable<Solution> } | { err: string };
+}
+
+export interface Logger {
+  debug(value: {}): void;
+}
