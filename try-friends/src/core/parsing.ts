@@ -111,7 +111,7 @@ const axiomBodyP: Parser<RuleStatementBody> =
 
 const inferenceBodyP: Parser<RuleStatementBody> =
   dePropsP.andL(blankP)
-    .andL(expectIdentP('なら'))
+    .andL(expectIdentP('なら').andR(blankP))
     .andA(headPropP).andL(blankP)
     .andL(expect('なんだね！'));
 
