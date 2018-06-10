@@ -145,7 +145,7 @@ const allP = <X>(p: Parser<X>): Parser<X> =>
 
 initTermP(makeTermP());
 
-export const tryParse = (source: string): Statement => {
+export const parse = (source: string): Statement => {
   const r = runParser({ source, parser: allP(statementP) });
   if (!r.ok) {
     throw new Error(`文法的に間違いがあります:\n${makeErrorMessage(r.error).join('\n')}`);
@@ -157,21 +157,21 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
   it('can parse rule', () => {
     eq(
       { head: { term: { var: { varName: 'あなた', varId: -1 } }, pred: '定命の' } },
-      tryParse('すごーい！ あなた は 定命の フレンズ なんだね！'),
+      parse('すごーい！ あなた は 定命の フレンズ なんだね！'),
     );
   });
 
   it('can parse group term', () => {
     eq(
       { head: { term: { atom: 'ソクラテスさん' }, pred: '定命の' } },
-      tryParse('すごーい！ 「「 ソクラテスさん 」」 は 定命の フレンズ なんだね！'),
+      parse('すごーい！ 「「 ソクラテスさん 」」 は 定命の フレンズ なんだね！'),
     );
   });
 
   it('can parse query', () => {
     eq(
       { query: { term: { atom: 'ソクラテスさん' }, pred: '定命の' } },
-      tryParse('ソクラテスさん　は\r\n\t定命の フレンズ なんですか？ '),
+      parse('ソクラテスさん　は\r\n\t定命の フレンズ なんですか？ '),
     );
   });
 
@@ -186,7 +186,7 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
           },
         },
       },
-      tryParse('ソクラテスさん は 定命の フレンズ で ソクラテスさん は 人間の フレンズ で プラトンさん が 師匠の フレンズ なんですか？'),
+      parse('ソクラテスさん は 定命の フレンズ で ソクラテスさん は 人間の フレンズ で プラトンさん が 師匠の フレンズ なんですか？'),
     );
   });
 };
