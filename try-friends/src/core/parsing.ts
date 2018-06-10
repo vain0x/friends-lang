@@ -5,9 +5,9 @@ import {
   endOfInputP,
   expect,
   makeErrorMessage,
-  parse,
   Parser,
   recursiveP,
+  runParser,
   spaceP,
   wordP,
 } from './parser-combinator';
@@ -146,7 +146,7 @@ const allP = <X>(p: Parser<X>): Parser<X> =>
 initTermP(makeTermP());
 
 export const tryParse = (source: string): Statement => {
-  const r = parse({ source, parser: allP(statementP) });
+  const r = runParser({ source, parser: allP(statementP) });
   if (!r.ok) {
     throw new Error(`文法的に間違いがあります:\n${makeErrorMessage(r.error).join('\n')}`);
   }

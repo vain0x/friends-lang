@@ -165,7 +165,7 @@ export const parser = <X>(parseFn: PF<X>): Parser<X> => {
   return new Parser<X>(parseFn);
 };
 
-export const parse = <X, Y>(arg: { source: string, parser: P<X> }): R<X> => {
+export const runParser = <X, Y>(arg: { source: string, parser: P<X> }): R<X> => {
   const { source, parser: p } = arg;
   const context = newContext({ source });
   const [result, _] = p.parse(context);
