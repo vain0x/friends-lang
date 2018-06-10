@@ -46,7 +46,7 @@ const makeConjProp = (props: Prop[]): Prop => {
 // prop = term ha pred friends
 // term = (atom | var | (term)) (no atom)* (to term)* toka?
 
-const [termP, initTermP] = recursiveP<Term, {}>();
+const [termP, initTermP] = recursiveP<Term>();
 
 const blankP = spaceP();
 const identP = wordP();
@@ -59,7 +59,7 @@ const hagamoP = identP.filter(w => 'はがも'.includes(w), 'は/が/も');
 const subjectP = termP.map(term => ({ term }));
 const predP = identP.map(pred => ({ pred }));
 
-const varOrAtomP: Parser<VarTerm | AtomTerm, {}> =
+const varOrAtomP: Parser<VarTerm | AtomTerm> =
   identP.map(ident => {
     if (ident.startsWith('_') || varIdents.has(ident)) {
       return { var: { varName: ident, varId: -1 } };
@@ -78,7 +78,7 @@ const appsP =
     .many()
     .map(apps => ({ apps }));
 
-const makeTermP = (): Parser<Term, {}> =>
+const makeTermP = (): Parser<Term> =>
   choice([
     groupTermP,
     varOrAtomP,
@@ -98,24 +98,24 @@ const dePropsP =
   ).many()
     .map(deProps => ({ deProps }));
 
-const conjPropP: Parser<Prop, {}> =
+const conjPropP: Parser<Prop> =
   propP.map(first => ({ first })).andL(blankP)
     .andA(dePropsP)
     .map(({ first, deProps }) => makeConjProp([first, ...deProps]));
 
 const headPropP = propP.map(head => ({ head }));
 
-const axiomBodyP: Parser<RuleStatementBody, {}> =
+const axiomBodyP: Parser<RuleStatementBody> =
   expect('なんだね！').attempt()
     .map(() => ({ head: undefined, deProps: [] }));
 
-const inferenceBodyP: Parser<RuleStatementBody, {}> =
+const inferenceBodyP: Parser<RuleStatementBody> =
   dePropsP.andL(blankP)
     .andL(expectIdentP('なら'))
     .andA(headPropP).andL(blankP)
     .andL(expect('なんだね！'));
 
-const ruleP: Parser<Rule, {}> =
+const ruleP: Parser<Rule> =
   expect('すごーい！').attempt().andR(blankP)
     .andR(propP.map(first => ({ first }))).andL(blankP)
     .andA(choice([
@@ -127,7 +127,7 @@ const ruleP: Parser<Rule, {}> =
       : { head: body.head, goal: makeConjProp([body.first, ...body.deProps]) },
   );
 
-const queryP: Parser<Query, {}> =
+const queryP: Parser<Query> =
   conjPropP.map(query => ({ query })).andL(blankP)
     .andL(choice([
       expect('なんですか？'),
@@ -135,18 +135,18 @@ const queryP: Parser<Query, {}> =
     ])).andL(blankP);
 
 const statementP =
-  choice<Statement, {}>([
+  choice<Statement>([
     ruleP,
     queryP,
   ]);
 
-const allP = <X>(p: Parser<X, {}>): Parser<X, {}> =>
+const allP = <X>(p: Parser<X>): Parser<X> =>
   blankP.andR(p).andL(blankP).andL(endOfInputP());
 
 initTermP(makeTermP());
 
 export const tryParse = (source: string): Statement => {
-  const r = parse({ source, u: 0, parser: allP(statementP) });
+  const r = parse({ source, parser: allP(statementP) });
   if (!r.ok) {
     throw new Error(`文法的に間違いがあります:\n${makeErrorMessage(r.error).join('\n')}`);
   }
