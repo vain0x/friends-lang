@@ -92,6 +92,15 @@ body {
 import { Vue, Component, Prop } from "vue-property-decorator";
 import { message } from "../../core/awesome";
 
+
+class ConsoleLogger implements Logger {
+  debug(value: {}): void {
+    console.debug(prettyJsonify(value));
+  }
+}
+
+const logger = new ConsoleLogger();
+
 @Component
 export default class FrontPageComponent extends Vue {
   @Prop() name: string;
