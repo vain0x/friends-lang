@@ -1,73 +1,170 @@
-import { AtomTerm, Term, VarTerm } from './ast';
+import { AtomTerm, ConjProp, PredProp, Prop, Query, Rule, Term, VarTerm } from './ast';
 import { None, Option, Some } from './option';
-import { choice, endOfInput, expect, parse, Parser, parser, recursiveP, spaceP, wordP } from './parser-combinator';
+import {
+  choice,
+  endOfInput,
+  expect,
+  parse,
+  Parser,
+  parser,
+  ParserError,
+  recursiveP,
+  spaceP,
+  successP,
+  wordP,
+} from './parser-combinator';
 import { TestSuite } from './testing-types';
 
 const blankP = spaceP();
-const blank1P = blankP.nonempty();
+const boundaryP = blankP;
 const identP = wordP();
 
-const hagamoP = expect('は');
+const hagamoP = identP.filter(w => 'はがも'.includes(w), 'は/が/も');
 
 const varIdents = new Set([
   'あなた', 'きみ', 'かれ', 'かのじょ', 'だれ',
   'なに', 'あれ', 'これ', 'これら', 'それ', 'それら',
 ]);
 
-const varOrAtomP: Parser<VarTerm | AtomTerm, {}> = identP.map(word => {
-  if (word.startsWith('_') || varIdents.has(word)) {
-    return { var: { varName: word, varId: -1 } };
+// pred nandane
+// pred (de conj)* nara pred nandane
+
+// Syntax:
+// statement = sugoi conj (nara conj)? nandane | conj nandesuka
+// conj = pred (de conj)*
+// pred = term ha p friends
+// term = (atom | var | (term)) (no atom)* (to term)* toka?
+
+const varOrAtomP: Parser<VarTerm | AtomTerm, {}> = identP.map(ident => {
+  if (ident.startsWith('_') || varIdents.has(ident)) {
+    return { var: { varName: ident, varId: -1 } };
   } else {
-    return { atom: word };
+    return { atom: ident };
   }
 });
 
 const [termP, initTermP] = recursiveP<Term, {}>();
 
-initTermP(
+const groupTermP =
+  expect('「').attempt().andR(blankP)
+    .andR(termP).andL(blankP)
+    .andL(expect('」'));
+
+const expectIdentP = (ident: string) =>
+  identP.filter(x => x === ident, `Expected '${ident}'.`);
+
+const appsP =
+  (expectIdentP('の').attempt().andL(blankP).andR(identP))
+    .many()
+    .map(apps => ({ apps }));
+
+const termPCore: Parser<Term, {}> =
   choice([
-    expect('「').attempt().andR(blankP).andR(termP).andL(blankP).andL(expect('」')),
+    groupTermP,
     varOrAtomP,
-  ]));
+  ]).map(term => ({ term }))
+    .andA(appsP)
+    .map(({ term, apps }) => {
+      // t no f no g -> g (f t)
+      for (let i = apps.length - 1; i >= 0; i--) {
+        term = { f: apps[i], x: term };
+      }
+      return term;
+    });
 
-const subjectP = termP.map(t => ({ subject: t }));
+const subjectP = termP.map(term => ({ term }));
+const predP = identP.map(pred => ({ pred }));
 
-const predicateP = expect('定命の').map(p => ({ predicate: p }));
+const propP =
+  subjectP.andL(blankP)
+    .andL(hagamoP).andL(blankP)
+    .andA(predP).andL(blankP)
+    .andL(expect('フレンズ'));
 
-const ruleStatementP =
+const dePropsP =
+  expectIdentP('で').attempt().andR(blankP).andR(propP).andL(blankP)
+    .many()
+    .map(deProps => ({ deProps }));
+
+const conjPropP: Parser<Prop, {}> =
+  propP.map(first => ({ first })).andL(blankP)
+    .andA(dePropsP)
+    .map(({ first, deProps }) => {
+      const props = [first, ...deProps];
+      // [p, q, r] -> p && (q && r)
+      let conj: Prop = props[props.length - 1];
+      for (let i = props.length - 2; i >= 0; i--) {
+        conj = { left: props[i], right: conj };
+      }
+      return conj;
+    });
+
+const axiomBodyP: Parser<{ head: undefined, deProps: Prop[] }, {}> =
+  expect('なんだね！').attempt().map(() => ({ head: undefined, deProps: [] }));
+
+const inferP: Parser<{ head: PredProp | undefined, deProps: Prop[] }, {}> =
+  dePropsP.andL(blankP)
+    .andL(expectIdentP('なら'))
+    .andA(propP.map(head => ({ head }))).andL(blankP)
+    .andL(expect('なんだね！'));
+
+const ruleStatementP: Parser<Rule, {}> =
   expect('すごーい！').attempt().andR(blankP)
-    .andR(subjectP).andL(blank1P)
-    .andL(hagamoP).andL(blank1P)
-    .andA(predicateP).andL(blank1P)
-    .andL(expect('フレンズ')).andL(blankP)
-    .andL(expect('なんだね！')).andL(blankP)
-    .map(x => Object.assign({}, x, { type: 'rule' }))
-  ;
+    .andR(propP.map(first => ({ first }))).andL(blankP)
+    .andA(choice([
+      axiomBodyP,
+      inferP,
+    ]))
+    .map(body => {
+      if (body.head === undefined) {
+        return { head: body.first };
+      } else {
+        const props = [body.first, ...body.deProps];
+        // [p, q, r] -> p && (q && r)
+        let conj: Prop = props[props.length - 1];
+        for (let i = props.length - 2; i >= 0; i--) {
+          conj = { left: props[i], right: conj };
+        }
+        return { head: body.head, goal: conj };
+      }
+    });
 
-const queryStatementP =
-  subjectP.andL(blank1P)
-    .andL(hagamoP).andL(blank1P).attempt()
-    .andA(predicateP).andL(blank1P)
-    .andL(expect('フレンズ')).andL(blankP)
-    .andL(expect('なんですか？')).andL(blankP)
-    .map(x => Object.assign({}, x, { type: 'query' }))
-  ;
+const queryStatementP: Parser<Query, {}> =
+  conjPropP.map(query => ({ query })).andL(blankP)
+    .andL(choice([
+      expect('なんですか？'),
+      expect('なんだっけ？'),
+    ])).andL(blankP);
 
 const statementP =
   blankP
-    .andR(choice([
+    .andR(choice<Rule | Query, {}>([
       ruleStatementP,
       queryStatementP,
     ]))
     .andL(blankP)
     .andL(endOfInput());
 
+initTermP(termPCore);
+
+const makeErrorMessage = (error: ParserError<{}>): string[] => {
+  const { label, source: { lines }, pos: { line, column }, children } = error;
+  const near = lines[line].substring(0, column);
+  const ls = [
+    `${label} at ${1 + line} line, ${1 + column} column near '${near}'`,
+  ];
+  for (const c of children) {
+    for (const l of makeErrorMessage(c)) {
+      ls.push('    ' + l);
+    }
+  }
+  return ls;
+};
+
 export const tryParse = (source: string) => {
   const r = parse({ source, u: 0, parser: statementP });
   if (!r.ok) {
-    const { source: { lines }, message, pos: { line, column } } = r.error;
-    const near = lines[line].substring(0, column);
-    throw new Error(`Parse Error:\n${message}\nAt ${1 + line} line, ${1 + column} column, near '${near}'`);
+    throw new Error(`Parse Error. Expected:\n${makeErrorMessage(r.error).join('\n')}`);
   }
   return r.value;
 };
@@ -75,21 +172,37 @@ export const tryParse = (source: string) => {
 export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
   it('can parse rule statement', () => {
     eq(
-      { type: 'rule', subject: { var: { varName: 'あなた', varId: -1 } }, predicate: '定命の' },
+      { head: { term: { var: { varName: 'あなた', varId: -1 } }, pred: '定命の' } },
       tryParse('すごーい！ あなた は 定命の フレンズ なんだね！'),
     );
   });
+
   it('can parse group term', () => {
     eq(
-      { type: 'rule', subject: { atom: 'ソクラテスさん' }, predicate: '定命の' },
+      { head: { term: { atom: 'ソクラテスさん' }, pred: '定命の' } },
       tryParse('すごーい！ 「「 ソクラテスさん 」」 は 定命の フレンズ なんだね！'),
     );
   });
 
   it('can parse query statement', () => {
     eq(
-      { type: 'query', subject: { atom: 'ソクラテスさん' }, predicate: '定命の' },
+      { query: { term: { atom: 'ソクラテスさん' }, pred: '定命の' } },
       tryParse('ソクラテスさん　は\r\n\t定命の フレンズ なんですか？ '),
+    );
+  });
+
+  it('can parse conjunction', () => {
+    eq(
+      {
+        query: {
+          left: { term: { atom: 'ソクラテスさん' }, pred: '定命の' },
+          right: {
+            left: { term: { atom: 'ソクラテスさん' }, pred: '人間の' },
+            right: { term: { atom: 'プラトンさん' }, pred: '師匠の' },
+          },
+        },
+      },
+      tryParse('ソクラテスさん は 定命の フレンズ で ソクラテスさん は 人間の フレンズ で プラトンさん が 師匠の フレンズ なんですか？'),
     );
   });
 };

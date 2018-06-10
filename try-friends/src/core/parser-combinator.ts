@@ -41,7 +41,8 @@ export interface ParserError<U> {
   source: Source;
   pos: Position;
   u: U;
-  message: string;
+  label: string;
+  children: Array<ParserError<U>>;
 }
 
 type P<X, U> = Parser<X, U>;
@@ -61,6 +62,26 @@ export class Parser<X, U> {
         return [r, c];
       }
       return [{ ok: true, value: f(r.value) }, c];
+    });
+  }
+
+  public withLabel(label: string): Parser<X, U> {
+    return parser(context => {
+      const [r, c] = this.parse(context);
+      if (!r.ok) {
+        return [{ ok: false, error: { ...r.error, label } }, c];
+      }
+      return [r, c];
+    });
+  }
+
+  public filter(f: (value: X) => boolean, message: string): Parser<X, U> {
+    return parser(context => {
+      const [r, c] = this.parse(context);
+      if (r.ok && !f(r.value)) {
+        return failure(message, context);
+      }
+      return [r, c];
     });
   }
 
@@ -114,6 +135,13 @@ export class Parser<X, U> {
     });
   }
 
+  public opt(): Parser<Option<X>, U> {
+    return choice<Option<X>, U>([
+      this.map(Some),
+      successP<None, U>(None),
+    ]);
+  }
+
   public attempt(): Parser<X, U> {
     return parser(context => {
       const [r, next] = this.parse(context);
@@ -125,7 +153,7 @@ export class Parser<X, U> {
     return parser(context => {
       const [r, next] = this.parse(context);
       if (r.ok && next.pos.index === context.pos.index) {
-        return failure('Expected any character is consumed here.', context);
+        return failure('any character', context);
       }
       return [r, next];
     });
@@ -145,15 +173,6 @@ export const parse = <X, Y, U>(arg: { source: string, u: U, parser: P<X, U> }): 
   const context = newContext({ source, u });
   const [result, _] = p.parse(context);
   return result;
-};
-
-const parserError = <U>(message: string, context: C<U>): E<U> => {
-  return {
-    source: context.source,
-    pos: context.pos,
-    u: context.u,
-    message,
-  };
 };
 
 const newSource = (str: string): Source => {
@@ -204,32 +223,36 @@ const advance = <U>(len: number, context: C<U>): C<U> => {
   };
 };
 
-const successResult = <X, U>(value: X, context: C<U>): R<X, U> => {
-  return {
+const success = <X, U>(value: X, context: C<U>): [R<X, U>, C<U>] => {
+  const r: R<X, U> = {
     ok: true,
     value,
   };
+  return [r, context];
 };
 
-const success = <X, U>(value: X, context: C<U>): [R<X, U>, C<U>] => {
-  return [successResult(value, context), context];
-};
-
-const failureResult = <U>(message: string, context: C<U>): R<never, U> => {
-  return {
+const failure = <X, U>(label: string, context: C<U>, children?: Array<E<U>>): [R<X, U>, C<U>] => {
+  const r: R<X, U> = {
     ok: false,
-    error: parserError(message, context),
+    error: {
+      source: context.source,
+      pos: context.pos,
+      u: context.u,
+      label,
+      children: children !== undefined ? children : [],
+    },
   };
+  return [r, context];
 };
 
-const failure = <X, U>(message: string, context: C<U>): [R<X, U>, C<U>] => {
-  return [failureResult(message, context), context];
-};
+export const successP = <T, U>(value: T): P<T, U> => parser(context => {
+  return success(value, context);
+});
 
 export const endOfInput = <U>(): P<None, U> => parser(context => {
   const { source: { str }, pos: { index } } = context;
   if (index < str.length) {
-    return failure('Expected an end of input.', context);
+    return failure('end of input', context);
   } else {
     return success(None, context);
   }
@@ -240,7 +263,7 @@ export const expect = <U>(pattern: string): P<string, U> => parser(context => {
   for (let i = 0; i < pattern.length; i++) {
     const j = sourceIndex + i;
     if (j >= str.length || pattern[i] !== str[j]) {
-      return failure(`Expected '${pattern}'.`, advance(i, context));
+      return failure(pattern, advance(i, context));
     }
   }
 
@@ -248,23 +271,22 @@ export const expect = <U>(pattern: string): P<string, U> => parser(context => {
 });
 
 export const choice = <X, U>(ps: Array<P<X, U>>): P<X, U> => parser(context => {
-  const es: Array<R<X, U>> = [];
+  const es: Array<E<U>> = [];
 
   for (const p of ps) {
     const [r, next] = p.parse(context);
 
     if (r.ok) {
-      return [r, next];
+      return [r, { ...next, cut: true }];
     }
+    es.push(r.error);
 
     if (next.cut) {
       break;
     }
-
-    es.push(r);
   }
 
-  return failure(`Expected one of (..).`, context);
+  return failure('either', context, es);
 });
 
 export const seq = <X, U>(ps: Array<P<X, U>>): P<X[], U> => parser(context => {
@@ -284,42 +306,30 @@ export const seq = <X, U>(ps: Array<P<X, U>>): P<X[], U> => parser(context => {
   return success(xs, current);
 });
 
-export const spaceP = <U>(): P<None, U> => parser(context => {
+const regexpP = <U>(matcher: RegExp) => parser<string, U>(context => {
   const { source: { str }, pos: { index: startIndex } } = context;
-  const PART = 8;
   let index = startIndex;
 
-  while (true) {
-    const near = str.substring(index, index + PART);
-    const ms = near.match(/^\s*/);
-    if (ms === null || ms.length === 0) {
+  while (index < str.length) {
+    const c = String.fromCodePoint(str.codePointAt(index)!);
+    const ms = c.match(matcher);
+    if (ms === null || ms.length === 0 || ms[0].length === 0) {
       break;
     }
-
-    const length = ms[0].length;
-    index += length;
-
-    if (length < PART) {
-      break;
-    }
-
-    break;
+    index += ms[0].length;
   }
 
-  return success(None, advance(index - startIndex, context));
+  return success(
+    str.substring(startIndex, index),
+    advance(index - startIndex, context),
+  );
 });
 
-export const wordP = <U>(): P<string, U> => parser(context => {
-  const { source: { lines }, pos: { line, column } } = context;
-  const near = lines[line].substring(column);
-  const ms = near.match(/^[\w\d_あ-んア-ン]+/); // FIXME: Should Hakase recognize Kanjis?
-  if (ms === null || ms.length === 0) {
-    return failure('Expected a word.', context);
-  }
+export const spaceP = <U>(): P<None, U> =>
+  regexpP<U>(/^\s/u).map(_ => None);
 
-  const word = ms[0];
-  return success(word, advance(word.length, context));
-});
+export const wordP = <U>(): P<string, U> =>
+  regexpP<U>(/^[\w\d_あ-んア-ン一-龠々〆]/u).nonempty().withLabel('単語');
 
 export const recursiveP = <T, U>(): [P<T, U>, (p: P<T, U>) => void] => {
   let inner: P<T, U>;
