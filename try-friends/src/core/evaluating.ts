@@ -6,7 +6,9 @@ import {
   nilTerm,
   Pred,
   PredProp,
+  ProofSystem,
   Prop,
+  Query,
   Rule,
   Solution,
   Term,
@@ -300,6 +302,24 @@ export function* query(prop: Prop, globalEnv: Env, globalKnowledge: Knowledge): 
     yield solution;
   }
 }
+
+class ImplProofSystem implements ProofSystem {
+  constructor(
+    private knowledge: Knowledge,
+  ) {
+  }
+
+  public assume(rule: Rule) {
+    return new ImplProofSystem(Knowledge.assume(this.knowledge, rule));
+  }
+
+  public query({ query: prop }: Query): Iterable<Solution> {
+    return query(prop, Env.default(), this.knowledge);
+  }
+}
+
+export const createProofSystem = () =>
+  new ImplProofSystem(Knowledge.default());
 
 // -------------------------------------------------------------
 // Unit Testing
