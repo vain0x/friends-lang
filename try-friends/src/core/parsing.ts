@@ -1,4 +1,4 @@
-import { AtomTerm, ConjProp, PredProp, Prop, Query, Rule, Statement, Term, VarTerm } from './ast';
+import { AtomTerm, ConjProp, LangParser, PredProp, Prop, Query, Rule, Statement, Term, VarTerm } from './ast';
 import { None, Option, Some } from './option';
 import {
   choice,
@@ -160,6 +160,12 @@ const parse = (source: string): Statement => {
   }
   return r;
 };
+
+export class FriendsLangParser implements LangParser {
+  public parse(source: string): Statement | { err: string; } {
+    return tryParse(source);
+  }
+}
 
 export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
   it('can parse axiom', () => {
