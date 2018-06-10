@@ -86,18 +86,19 @@ const dePropsP =
     .many()
     .map(deProps => ({ deProps }));
 
+const makeConjProp = (props: Prop[]): Prop => {
+  // [p, q, r] -> p && (q && r)
+  let conj: Prop = props[props.length - 1];
+  for (let i = props.length - 2; i >= 0; i--) {
+    conj = { left: props[i], right: conj };
+  }
+  return conj;
+};
+
 const conjPropP: Parser<Prop, {}> =
   propP.map(first => ({ first })).andL(blankP)
     .andA(dePropsP)
-    .map(({ first, deProps }) => {
-      const props = [first, ...deProps];
-      // [p, q, r] -> p && (q && r)
-      let conj: Prop = props[props.length - 1];
-      for (let i = props.length - 2; i >= 0; i--) {
-        conj = { left: props[i], right: conj };
-      }
-      return conj;
-    });
+    .map(({ first, deProps }) => makeConjProp([first, ...deProps]));
 
 const axiomBodyP: Parser<{ head: undefined, deProps: Prop[] }, {}> =
   expect('なんだね！').attempt().map(() => ({ head: undefined, deProps: [] }));
@@ -115,19 +116,10 @@ const ruleStatementP: Parser<Rule, {}> =
       axiomBodyP,
       inferP,
     ]))
-    .map(body => {
-      if (body.head === undefined) {
-        return { head: body.first };
-      } else {
-        const props = [body.first, ...body.deProps];
-        // [p, q, r] -> p && (q && r)
-        let conj: Prop = props[props.length - 1];
-        for (let i = props.length - 2; i >= 0; i--) {
-          conj = { left: props[i], right: conj };
-        }
-        return { head: body.head, goal: conj };
-      }
-    });
+    .map(body => body.head === undefined
+      ? { head: body.first }
+      : { head: body.head, goal: makeConjProp([body.first, ...body.deProps]) },
+    );
 
 const queryStatementP: Parser<Query, {}> =
   conjPropP.map(query => ({ query })).andL(blankP)
