@@ -146,6 +146,10 @@ export interface LangParser {
   parse(source: string): Statement | { err: string };
 }
 
+export interface LangPrinter {
+  printTerm(term: Term): string;
+}
+
 export interface Repl {
   input(source: string): { accepted: true } | { solutions: Iterable<Solution> } | { err: string };
 }
