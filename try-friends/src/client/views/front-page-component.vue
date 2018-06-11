@@ -116,6 +116,7 @@ import { message } from "../../core/awesome";
 import { Solution, Repl, Logger } from "../../core/ast";
 import { createFriendsLangRepl } from "../../core/repl";
 import { exhaust } from "../../core/util";
+import { FriendsLangPrinter } from "../../core/printing";
 
 const emptyIterator = () => [][Symbol.iterator]();
 
@@ -128,6 +129,8 @@ class ConsoleLogger implements Logger {
 }
 
 const logger = new ConsoleLogger();
+
+const printer = new FriendsLangPrinter();
 
 @Component
 export default class FrontPageComponent extends Vue {
@@ -192,7 +195,7 @@ export default class FrontPageComponent extends Vue {
       this.errorMessage = "そのようですね"
     } else {
       this.assignment = [
-        ...solution.map(({ varName, term }) => `${varName} は ${prettyJsonify(term)} 、`),
+        ...solution.map(({ varName, term }) => `${varName} は ${printer.printTerm(term)} 、`),
         "なのです",
       ].join("\n");
     }
