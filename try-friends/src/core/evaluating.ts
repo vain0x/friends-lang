@@ -293,6 +293,9 @@ export function* query(prop: Prop, globalEnv: Env, globalKnowledge: Knowledge): 
     const solution: Solution = [];
     for (const v of vars) {
       const term = Env.substitute(localEnv, { var: v });
+      if ('var' in term && Env.tryFind(localEnv, term.var) === undefined) {
+        continue;
+      }
       const assignment = {
         varName: v.varName,
         term,
@@ -396,6 +399,30 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
           eq(Env.substitute(env, test), expected);
         });
       }
+    });
+  });
+
+  describe('query', () => {
+    it('ignores unbound vars', () => {
+      const k =
+        Knowledge.assumeMany(Knowledge.default(), [
+          { head: { pred: 'unknown', term: x } },
+          { head: { pred: 'unknown', term: { atom: 'a' } } },
+        ]);
+      eq(
+        [...query({ pred: 'unknown', term: y }, Env.default(), k)],
+        [
+          // empty because y is free
+          [],
+          [
+            { varName: 'y', term: { atom: 'a' } },
+          ],
+        ],
+      );
+    });
+
+    it('includes bindings between vars', () => {
+      // unify(X, X). ?- unify(X, Y). should print X=Y or Y=X.
     });
   });
 
