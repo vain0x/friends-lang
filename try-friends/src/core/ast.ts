@@ -163,3 +163,25 @@ export interface Repl {
 export interface Logger {
   debug(value: {}): void;
 }
+
+const varTerm = (varName: string): VarTerm => {
+  return {
+    var: {
+      varName,
+      varId: -1,
+    },
+  };
+};
+
+const listTerm = (terms: Term[], tail?: Term): Term => {
+  let term: Term = tail || nilTerm;
+  for (let i = terms.length - 1; i >= 0; i--) {
+    term = { head: terms[i], tail: term };
+  }
+  return term;
+};
+
+export const AstHelper = {
+  varTerm,
+  listTerm,
+};
