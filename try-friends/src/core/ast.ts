@@ -29,6 +29,7 @@ export type Term =
   | VarTerm
   | AtomTerm
   | AppTerm
+  | ListTerm
   ;
 
 export interface VarTerm {
@@ -52,6 +53,11 @@ export const nilTerm = {
 export interface AppTerm {
   f: Atom;
   x: Term;
+}
+
+export interface ListTerm {
+  head: Term;
+  tail: Term;
 }
 
 /**

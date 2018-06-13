@@ -1,4 +1,4 @@
-import { AtomTerm, ConjProp, LangParser, PredProp, Prop, Query, Rule, Statement, Term, VarTerm } from './ast';
+import { AtomTerm, ConjProp, LangParser, nilTerm, PredProp, Prop, Query, Rule, Statement, Term, VarTerm } from './ast';
 import { None, Option, Some } from './option';
 import {
   choice,
@@ -23,12 +23,38 @@ const varIdents = new Set([
   'なに', 'あれ', 'これ', 'これら', 'それ', 'それら',
 ]);
 
-const makeAppTerm = ({ term, apps }: { term: Term, apps: string[] }): Term => {
+const makeAppTerm = ({ term, apps }: { term: Term, apps: string[] }): { term: Term } => {
   // t no f no g -> g (f t)
   for (let i = apps.length - 1; i >= 0; i--) {
     term = { f: apps[i], x: term };
   }
-  return term;
+  return { term };
+};
+
+const makeListTerm = (
+  { term, items, tailed }: {
+    term: Term,
+    items: Array<{ term: Term }>,
+    tailed: boolean,
+  },
+): { term: Term } => {
+  if (items.length === 0) {
+    return { term };
+  }
+
+  let i = items.length - 1;
+  let t: Term;
+  if (tailed) {
+    t = items[i].term;
+    i--;
+  } else {
+    t = nilTerm;
+  }
+  for (; i >= 0; i--) {
+    t = { head: items[i].term, tail: t };
+  }
+  t = { head: term, tail: t };
+  return { term: t };
 };
 
 const makeConjProp = (props: Prop[]): Prop => {
@@ -44,9 +70,10 @@ const makeConjProp = (props: Prop[]): Prop => {
 // statement = sugoi conj (nara conj)? nandane | conj nandesuka
 // conj = prop (de conj)*
 // prop = term ha pred friends
-// term = (atom | var | (term)) (no atom)* (to term)* toka?
+// term = (atom | var | (term)) (no atom)* (to term (to term)* toka?)
 
-const [termP, initTermP] = recursiveP<Term>();
+const [termP, initTermP] = recursiveP<{ term: Term }>();
+const [appTermP, initAppTermP] = recursiveP<{ term: Term }>();
 
 const blankP = spaceP();
 const identP = wordP();
@@ -56,15 +83,14 @@ const expectIdentP = (ident: string) =>
 
 const hagamoP = identP.filter(w => 'はがも'.includes(w), 'は/が/も');
 
-const subjectP = termP.map(term => ({ term }));
 const predP = identP.map(pred => ({ pred }));
 
-const varOrAtomP: Parser<VarTerm | AtomTerm> =
+const varOrAtomP: Parser<{ term: VarTerm | AtomTerm }> =
   identP.map(ident => {
     if (ident.startsWith('_') || varIdents.has(ident)) {
-      return { var: { varName: ident, varId: -1 } };
+      return { term: { var: { varName: ident, varId: -1 } } };
     } else {
-      return { atom: ident };
+      return { term: { atom: ident } };
     }
   });
 
@@ -78,16 +104,28 @@ const appsP =
     .many()
     .map(apps => ({ apps }));
 
-const makeTermP = (): Parser<Term> =>
+const conssP =
+  (
+    expectIdentP('と').attempt().andL(blankP)
+      .andR(appTermP).andL(blankP)
+  ).many().map(items => ({ items }))
+    .andA(expectIdentP('とか').attempt().opt().map(x => ({ tailed: x !== None })));
+
+const makeAppTermP = (): Parser<{ term: Term }> =>
   choice([
     groupTermP,
     varOrAtomP,
-  ]).map(term => ({ term }))
+  ]).andL(blankP)
     .andA(appsP)
     .map(makeAppTerm);
 
+const makeTermP = (): Parser<{ term: Term }> =>
+  appTermP.andL(blankP)
+    .andA(conssP)
+    .map(makeListTerm);
+
 const propP =
-  subjectP.andL(blankP)
+  termP.andL(blankP)
     .andL(hagamoP).andL(blankP)
     .andA(predP).andL(blankP)
     .andL(expect('フレンズ'));
@@ -143,6 +181,7 @@ const statementP =
 const allP = <X>(p: Parser<X>): Parser<X> =>
   blankP.andR(p).andL(blankP).andL(endOfInputP());
 
+initAppTermP(makeAppTermP());
 initTermP(makeTermP());
 
 const tryParse = (source: string): Statement | { err: string } => {
@@ -168,6 +207,9 @@ export class FriendsLangParser implements LangParser {
 }
 
 export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
+  const fv = (varName: string) => ({ varName, varId: -1 });
+  const anata = { var: { varName: 'あなた', varId: -1 } };
+
   it('can parse axiom', () => {
     eq(
       { head: { term: { var: { varName: 'あなた', varId: -1 } }, pred: '定命の' } },
@@ -193,8 +235,34 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
 
   it('can parse group term', () => {
     eq(
-      { head: { term: { atom: 'ソクラテスさん' }, pred: '人間の' } },
-      parse('すごーい！ 「「 ソクラテスさん 」」 は 人間の フレンズ なんだね！'),
+      { head: { term: { atom: 'ソクラテス' }, pred: '人間の' } },
+      parse('すごーい！ 「「 ソクラテス 」」 は 人間の フレンズ なんだね！'),
+    );
+  });
+
+  it('can parse list term', () => {
+    eq(
+      {
+        head: {
+          term: {
+            head: { atom: 'ソクラテス' },
+            tail: {
+              head: { atom: 'プラトン' },
+              tail: nilTerm,
+            },
+          },
+          pred: '師弟の',
+        },
+      },
+      parse('すごーい！ ソクラテス と プラトン は 師弟の フレンズ なんだね！'),
+    );
+  });
+
+  it('can parse list with tail term', () => {
+
+    eq(
+      { head: { term: { head: { atom: 'ソクラテス' }, tail: anata }, pred: '哲学が得意な' } },
+      parse('すごーい！ ソクラテス と あなた とか は 哲学が得意な フレンズ なんだね！'),
     );
   });
 
@@ -212,11 +280,11 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
           left: { term: { atom: 'ソクラテスさん' }, pred: '定命の' },
           right: {
             left: { term: { atom: 'ソクラテスさん' }, pred: '人間の' },
-            right: { term: { atom: 'プラトンさん' }, pred: '師匠の' },
+            right: { term: { atom: 'プラトンさん' }, pred: '弟子の' },
           },
         },
       },
-      parse('ソクラテスさん は 定命の フレンズ で ソクラテスさん は 人間の フレンズ で プラトンさん が 師匠の フレンズ なんですか？'),
+      parse('ソクラテスさん は 定命の フレンズ で ソクラテスさん は 人間の フレンズ で プラトンさん が 弟子の フレンズ なんですか？'),
     );
   });
 };

@@ -10,4 +10,4 @@ export const todo = (): never => {
  * Statically asserts that it exhausted all possibilities of the specified value
  * by checking its type is never.
  */
-export const exhaust = (value: never): never => value;
+export const exhaust = (...value: never[]): never => value[0];

@@ -37,6 +37,8 @@ const Term = {
       return [];
     } else if ('f' in term) {
       return Term.vars(term.x);
+    } else if ('head' in term) {
+      return [...Term.vars(term.head), ...Term.vars(term.tail)];
     } else {
       return exhaust(term);
     }
@@ -50,6 +52,11 @@ const Term = {
       return {
         f: term.f,
         x: Term.withVarId(term.x, varId),
+      };
+    } else if ('head' in term) {
+      return {
+        head: Term.withVarId(term.head, varId),
+        tail: Term.withVarId(term.tail, varId),
       };
     } else {
       return exhaust(term);
@@ -184,6 +191,11 @@ const Env = {
         f: term.f,
         x: Env.substitute(env, term.x),
       };
+    } else if ('head' in term) {
+      return {
+        head: Env.substitute(env, term.head),
+        tail: Env.substitute(env, term.tail),
+      };
     } else {
       return exhaust(term);
     }
@@ -206,8 +218,20 @@ const Env = {
         return env;
       } else if ('f' in lTerm && 'f' in rTerm && lTerm.f === rTerm.f) {
         return Env.tryUnify(env, lTerm.x, rTerm.x);
-      } else {
+      } else if ('head' in lTerm && 'head' in rTerm) {
+        const env2 = Env.tryUnify(env, lTerm.head, rTerm.head);
+        if (env2 === undefined) {
+          return undefined;
+        }
+        return Env.tryUnify(env2, lTerm.tail, rTerm.tail);
+      } else if (
+        'atom' in lTerm || 'atom' in rTerm
+        || 'f' in lTerm || 'f' in rTerm
+        || 'head' in lTerm || 'head' in rTerm
+      ) {
         return undefined;
+      } else {
+        return exhaust(lTerm, rTerm);
       }
     };
   })(),
@@ -336,6 +360,13 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
     pred: predName,
     term,
   });
+  const listTerm = (...terms: Term[]) => {
+    let term: Term = nilTerm;
+    for (let i = terms.length - 1; i >= 0; i--) {
+      term = { head: terms[i], tail: term };
+    }
+    return term;
+  };
 
   const socrates = { atom: 'socrates' };
   const plato = { atom: 'plato' };
@@ -387,6 +418,13 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
           right: f(socrates),
           test: x,
           expected: socrates,
+        },
+        {
+          desc: 'list binding',
+          left: listTerm(x, plato),
+          right: listTerm(socrates, y),
+          test: listTerm(x, y),
+          expected: listTerm(socrates, plato),
         },
       ];
 
