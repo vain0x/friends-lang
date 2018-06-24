@@ -1,0 +1,86 @@
+$breakpoint-mobile: 699px;
+
+@mixin mobile {
+  @media screen and (max-width: $breakpoint-mobile) {
+    @content;
+  }
+}
+
+$z-index-background: -100;
+$z-index-footer: -1;
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  font-size: 16px;
+
+  @include mobile {
+    font-size: 14px;
+  }
+}
+
+#background {
+  background-image: url("/assets/savanna-small.jpg");
+  background-size: cover;
+  position: fixed;
+  z-index: $z-index-background;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+#background:before {
+  $blur-radious: 5px;
+
+  content: '';
+  background: inherit;
+  -webkit-filter: blur($blur-radious);
+  -moz-filter: blur($blur-radious);
+  -o-filter: blur($blur-radious);
+  -ms-filter: blur($blur-radious);
+  filter: blur($blur-radious);
+
+  position: absolute;
+  top: -$blur-radious;
+  left: -$blur-radious;
+  right: -$blur-radious;
+  bottom: -$blur-radious;
+  z-index: $z-index-background;
+}
+
+#main-content {
+  margin: 0 auto;
+  width: 640px;
+  overflow: initial;
+
+  @include mobile {
+    padding: 8px;
+    width: 90%;
+  }
+}
+
+header {
+  #header-logo {
+    display: block;
+    width: auto;
+    height: 250px;
+
+    @include mobile {
+      height: 100px;
+    }
+  }
+}
+
+footer {
+  padding: 0 0 4px 0;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 99.5%; // padding-right
+  color: white;
+  text-align: right;
+  text-shadow: 1px 1px 1px #bdbdbd;
+  z-index: $z-index-footer;
+}

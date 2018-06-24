@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import { message } from '../core/awesome';
+import './styles/main.scss';
 import FrontPageComponent from './views/front-page-component.vue';
 import { registerComponents, routes, vueRouter } from './views/routing';
 

@@ -1,11 +1,7 @@
 <template>
   <article class="friends-repl">
-    <h2>Try Friends-lang</h2>
-
-    <pre>
-例: あなた は 定命の フレンズ なんですか？
-例: ソクラテスさん は 定命の フレンズ なんですか？
-    </pre>
+    <p>例: あなた は 定命の フレンズ なんですか？</p>
+    <p>例: ソクラテスさん は 定命の フレンズ なんですか？</p>
 
     <form>
       <textarea
@@ -59,17 +55,7 @@
 </template>
 
 <style>
-html,
-body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  background: #cceeff;
-}
-
 .friends-repl {
-  margin: 0 auto;
-  width: 640px;
 }
 
 .friends-repl-panel {
