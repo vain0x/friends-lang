@@ -1,13 +1,15 @@
 <template>
   <article id="main-content">
     <header>
-      <img
-        id="header-logo"
-        width="874px"
-        height="350px"
-        alt="logo"
-        src="/assets/logo.png"
-      >
+      <router-link to="/">
+        <img
+          id="header-logo"
+          width="874px"
+          height="350px"
+          alt="logo"
+          src="/assets/logo.png"
+        >
+      </router-link>
     </header>
 
     <main id="vue-router">
@@ -15,7 +17,7 @@
     </main>
 
     <footer>
-      Try Friends-lang powered by
+      <router-link to="/about/">Try Friends-lang</router-link> powered by
         <a href="https://aratama.github.io/kemonogen/">Kemono Friends Logo Generator</a>
         and <a href="https://www.flickr.com/photos/5lab/4004317022/">Savanna</a>.
     </footer>
