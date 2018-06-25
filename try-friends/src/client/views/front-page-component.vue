@@ -1,5 +1,20 @@
 <template>
   <article class="friends-repl">
+    <div class="stream">
+      <div
+        class="stream-item"
+        v-for="message in messages"
+        :key="message.key"
+        :data-type="message.type"
+      >
+        <div class="icon"></div>
+
+        <div class="message">
+          {{ message.content }}
+        </div>
+      </div>
+    </div>
+
     <p>例: あなた は 定命の フレンズ なんですか？</p>
     <p>例: ソクラテスさん は 定命の フレンズ なんですか？</p>
 
@@ -54,48 +69,6 @@
   </article>
 </template>
 
-<style>
-.friends-repl {
-}
-
-.friends-repl-panel {
-  background: #fbfbfb;
-
-  margin: 16px 0;
-  padding: 13px;
-  border: solid 2px #f6a20e;
-}
-
-.friends-repl-editor {
-  width: 100%;
-}
-
-.friends-repl-solution {
-  min-height: 120px;
-  max-height: 240px;
-  white-space: pre-wrap;
-  font-family: monospace;
-}
-
-.friends-repl button {
-  width: 84px;
-  height: 30px;
-}
-
-.friends-repl-ask-button {
-  background: #f6a20e;
-  font-weight: 900;
-}
-
-.friends-repl-yes-button {
-  color: #008000;
-}
-
-.friends-repl-no-button {
-  color: #000080;
-}
-</style>
-
 <script lang="ts">
 import { Vue, Component, Prop } from "vue-property-decorator";
 import { message } from "../../core/awesome";
@@ -118,6 +91,14 @@ const logger = new ConsoleLogger();
 
 const printer = new FriendsLangPrinter();
 
+let k = 0;
+
+const item = (type: string, content: string) => ({
+  key: ++k,
+  type,
+  content,
+});
+
 @Component
 export default class FrontPageComponent extends Vue {
   @Prop() name: string;
@@ -129,6 +110,13 @@ export default class FrontPageComponent extends Vue {
   private iter: Iterator<Solution> = emptyIterator();
   private errorMessage: string = "";
   private repl: Repl = createFriendsLangRepl(logger);
+
+  private messages = [
+    item("rule", "すごーい！ あなた は 定命の フレンズ なんだね！"),
+    item("rule", "すごーい！ あなた が 人間の フレンズ なら あなた は 定命の フレンズ なんだね！"),
+    item("query", "だれ が 定命の フレンズ なんですか？"),
+    item("solution", "定命の フレンズ は ソクラテス なのです"),
+  ];
 
   onAsk() {
     logger.debug("onAsk");

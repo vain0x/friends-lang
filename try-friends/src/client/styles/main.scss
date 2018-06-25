@@ -1,4 +1,4 @@
-$breakpoint-mobile: 699px;
+$breakpoint-mobile: 719px;
 
 @mixin mobile {
   @media screen and (max-width: $breakpoint-mobile) {
@@ -52,7 +52,7 @@ body {
 
 #main-content {
   margin: 0 auto;
-  width: 640px;
+  width: 700px;
   overflow: initial;
 
   @include mobile {
@@ -83,4 +83,95 @@ footer {
   text-align: right;
   text-shadow: 1px 1px 1px #bdbdbd;
   z-index: $z-index-footer;
+}
+
+.friends-repl {
+  .stream {
+    display: flex;
+    flex-direction: column;
+
+    .stream-item {
+      display: flex;
+
+      &[data-type="rule"] {
+        flex-direction: row;
+
+        .icon {
+          background: #f6a20e;
+        }
+      }
+
+      &[data-type="query"] {
+        flex-direction: row;
+
+        .icon {
+          background: red;
+        }
+      }
+
+      &[data-type="solution"] {
+        flex-direction: row-reverse;
+
+        .icon {
+          background: green;
+        }
+      }
+
+      .icon {
+        width: 50px;
+        clip-path: circle(25px);
+        vertical-align: top;
+      }
+
+      .message {
+        margin: 0 8px 8px 8px;
+        padding: 16px 24px;
+
+        width: 300px;
+        border-radius: 24px;
+        background: white;
+
+        @include mobile {
+          width: 150px;
+        }
+      }
+    }
+  }
+}
+
+.friends-repl-panel {
+  background: #fbfbfb;
+
+  margin: 16px 0;
+  padding: 13px;
+  border: solid 2px #f6a20e;
+}
+
+.friends-repl-editor {
+  width: 100%;
+}
+
+.friends-repl-solution {
+  min-height: 120px;
+  max-height: 240px;
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+
+.friends-repl button {
+  width: 84px;
+  height: 30px;
+}
+
+.friends-repl-ask-button {
+  background: #f6a20e;
+  font-weight: 900;
+}
+
+.friends-repl-yes-button {
+  color: #008000;
+}
+
+.friends-repl-no-button {
+  color: #000080;
 }
