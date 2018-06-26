@@ -310,6 +310,16 @@ export const spaceP = (): P<None> =>
 export const wordP = (): P<string> =>
   regexpP(/^[\w\d_あ-んア-ン一-龠々〆]/u).nonempty().withLabel('単語');
 
+export const restOfLineP = (): P<string> => parser<string>(context => {
+  const { source: { str }, pos: { index: startIndex } } = context;
+  const index = str.indexOf('\n', startIndex);
+  const { endIndex, skip } = index < 0
+    ? { endIndex: str.length, skip: 0 }
+    : { endIndex: index, skip: 1 };
+  const content = str.substring(startIndex, endIndex);
+  return success(content, advance(content.length + skip, context));
+});
+
 export const recursiveP = <T>(): [P<T>, (p: P<T>) => void] => {
   let inner: P<T>;
   const set = (p: P<T>) => { inner = p; };

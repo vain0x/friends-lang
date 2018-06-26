@@ -7,6 +7,7 @@ import {
   makeErrorMessage,
   Parser,
   recursiveP,
+  restOfLineP,
   runParser,
   spaceP,
   wordP,
@@ -75,7 +76,8 @@ const makeConjProp = (props: Prop[]): Prop => {
 const [termP, initTermP] = recursiveP<{ term: Term }>();
 const [appTermP, initAppTermP] = recursiveP<{ term: Term }>();
 
-const blankP = spaceP();
+const commentP = expect('//').attempt().andR(restOfLineP());
+const blankP = spaceP().andL(commentP.andR(spaceP()).many());
 const identP = wordP();
 
 const expectIdentP = (ident: string) =>
@@ -259,7 +261,6 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
   });
 
   it('can parse list with tail term', () => {
-
     eq(
       { head: { term: { head: { atom: 'ソクラテス' }, tail: anata }, pred: '哲学が得意な' } },
       parse('すごーい！ ソクラテス と あなた とか は 哲学が得意な フレンズ なんだね！'),
@@ -286,5 +287,10 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
       },
       parse('ソクラテスさん は 定命の フレンズ で ソクラテスさん は 人間の フレンズ で プラトンさん が 弟子の フレンズ なんですか？'),
     );
+  });
+
+  it('can parse comments', () => {
+    // throw if failure
+    parse('//\nソクラテス//ここはこめんと\r\nは 定命の フレンズ なんですか？ /////');
   });
 };
