@@ -2,6 +2,8 @@
  * Abstract syntax tree (AST).
  */
 
+import { Terminatorless } from 'babel-types';
+
 /**
  * Predicate.
  */
@@ -135,13 +137,15 @@ export interface Env {
   } | undefined;
 }
 
+export type Assignment =
+  | { varName: string, term: Term }
+  | { varName: string, unbound: true }
+  ;
+
 /**
  * One of assignments that let the query be true. Variables occur in given order.
  */
-export type Solution = Array<{
-  varName: string,
-  term: Term,
-}>;
+export type Solution = Assignment[];
 
 export interface ProofSystem {
   assume(rule: Rule): ProofSystem;

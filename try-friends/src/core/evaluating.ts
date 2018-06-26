@@ -1,5 +1,6 @@
 import {
   AppTerm,
+  Assignment,
   CutProp,
   Env,
   Knowledge,
@@ -317,13 +318,11 @@ export function* query(prop: Prop, globalEnv: Env, globalKnowledge: Knowledge): 
     const solution: Solution = [];
     for (const v of vars) {
       const term = Env.substitute(localEnv, { var: v });
-      if ('var' in term && Env.tryFind(localEnv, term.var) === undefined) {
-        continue;
-      }
-      const assignment = {
-        varName: v.varName,
-        term,
-      };
+      const unbound = 'var' in term && Env.tryFind(localEnv, term.var) === undefined;
+
+      const assignment: Assignment = unbound
+        ? { varName: v.varName, unbound }
+        : { varName: v.varName, term };
       solution.push(assignment);
     }
     yield solution;
@@ -441,7 +440,7 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
   });
 
   describe('query', () => {
-    it('ignores unbound vars', () => {
+    it('detects unbound vars', () => {
       const k =
         Knowledge.assumeMany(Knowledge.default(), [
           { head: { pred: 'unknown', term: x } },
@@ -450,8 +449,9 @@ export const testSuite: TestSuite = ({ describe, context, it, eq }) => {
       eq(
         [...query({ pred: 'unknown', term: y }, Env.default(), k)],
         [
-          // empty because y is free
-          [],
+          [
+            { varName: 'y', unbound: true },
+          ],
           [
             { varName: 'y', term: { atom: 'a' } },
           ],

@@ -76,6 +76,7 @@ import { Solution, Repl, Logger } from "../../core/ast";
 import { createFriendsLangRepl } from "../../core/repl";
 import { exhaust } from "../../core/util";
 import { FriendsLangPrinter } from "../../core/printing";
+import { flatMap } from "../../core/iterable";
 
 const emptyIterator = () => [][Symbol.iterator]();
 
@@ -169,7 +170,9 @@ export default class FrontPageComponent extends Vue {
       this.errorMessage = "そのようですね"
     } else {
       this.assignment = [
-        ...solution.map(({ varName, term }) => `${varName} は ${printer.printTerm(term)} 、`),
+        ...flatMap(solution, t => "term" in t
+          ? [`${t.varName} は ${printer.printTerm(t.term)} 、`]
+          : []),
         "なのです",
       ].join("\n");
     }
