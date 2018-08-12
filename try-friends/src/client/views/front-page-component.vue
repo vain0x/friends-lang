@@ -94,7 +94,15 @@ const printer = new FriendsLangPrinter();
 
 let k = 0;
 
-const item = (type: string, content: string) => ({
+type MessageType = "rule" | "query" | "solution";
+
+interface Message {
+  key: number
+  type: MessageType;
+  content: string
+}
+
+const item = (type: MessageType, content: string): Message => ({
   key: ++k,
   type,
   content,
@@ -119,10 +127,15 @@ export default class FrontPageComponent extends Vue {
     item("solution", "定命の フレンズ は ソクラテス なのです"),
   ];
 
+  post(message: Message) {
+    this.messages = [...this.messages, message];
+  }
+
   onAsk() {
     logger.debug("onAsk");
 
-    if (this.query.trim() === "") {
+    const content = this.query.trim();
+    if (content === "") {
       return;
     }
 
@@ -133,12 +146,15 @@ export default class FrontPageComponent extends Vue {
     } else if ("accepted" in r) {
       this.errorMessage = "";
       const id = this.statements.length;
-      const content = this.query.trim();
       this.statements = [...this.statements, { id, content }];
+
+      this.post(item("rule", content));
       return;
     } else if ("solutions" in r) {
       this.errorMessage = "";
       this.iter = r.solutions[Symbol.iterator]();
+
+      this.post(item("query", content));
       this.onNo();
       return;
     } else {
@@ -147,13 +163,13 @@ export default class FrontPageComponent extends Vue {
   }
 
   onYes() {
-    console.debug("onYes");
+    logger.debug("onYes");
     this.iter = emptyIterator();
     this.errorMessage = "このくらいは朝飯前なのです";
   }
 
   onNo() {
-    console.debug("onNo");
+    logger.debug("onNo");
 
     const result = this.iter.next();
     logger.debug({ result });
@@ -161,13 +177,24 @@ export default class FrontPageComponent extends Vue {
     if (result.done) {
       this.assignment = "";
       this.errorMessage = "解なしなのです";
+
+      this.post(item("solution", "解なしなのです"));
       return;
     }
 
     const solution = result.value;
-    if (solution.length === 0) {
+    const bindings = [...flatMap(solution, t => {
+      if ("term" in t) {
+        return [t];
+      } else {
+        return [];
+      }
+    })];
+    if (bindings.length === 0) {
       this.assignment = "";
       this.errorMessage = "そのようですね"
+
+      this.post(item("solution", "そのようですね"));
     } else {
       this.assignment = [
         ...flatMap(solution, t => "term" in t
@@ -175,6 +202,8 @@ export default class FrontPageComponent extends Vue {
           : []),
         "なのです",
       ].join("\n");
+
+      this.post(item("solution", this.assignment));
     }
   }
 }
