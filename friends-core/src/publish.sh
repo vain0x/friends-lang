@@ -9,4 +9,4 @@ cd ../publish/
 zip -r friendsi-win-x64.zip friendsi-win-x64
 zip -r friendsi-osx-x64.zip friendsi-osx-x64
 zip -r friendsi-linux-x64.zip friendsi-linux-x64
-sha256sum *.zip > checksum.txt
+sha256sum --binary *.zip > checksum.txt

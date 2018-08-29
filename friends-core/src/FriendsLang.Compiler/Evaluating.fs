@@ -1,4 +1,7 @@
-namespace FriendsLang.Compiler
+namespace FriendsLang.Compiler.Evaluating
+
+open FriendsLang.Compiler
+open FriendsLang.Compiler.Ast
 
 module Counter =
   let counter = ref 0
@@ -8,7 +11,6 @@ module Counter =
     counter |> incr
     value
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Term =
   [<Literal>]
   let NilName = "nil"
@@ -58,7 +60,7 @@ module Term =
         yield! variables tailTerm
     }
 
-  let rec replaceId id =
+  let replaceId id =
     let rec loop term =
       match term with
       | VarTerm var ->
@@ -78,7 +80,6 @@ module TermExtension =
     | AtomTerm (Atom Term.NilName) -> Some ()
     | _ -> None
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module AtomicProposition =
   let rec replaceId id (prop: AtomicProposition) =
     prop.Predicate.[prop.Term |> Term.replaceId id]
@@ -86,7 +87,6 @@ module AtomicProposition =
   let rec refresh prop =
     replaceId (Counter.nextId ()) prop
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Proposition =
   let rec variables =
     function
@@ -109,7 +109,6 @@ module Proposition =
   let rec refresh prop =
     replaceId (Counter.nextId ()) prop
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Rule =
   let rec refresh =
     function
@@ -122,10 +121,10 @@ module Rule =
       InferRule (head, body)
 
 type Knowledge(map: HashMap<Predicate, Vector<Rule>>) =
-  member this.FindAll(predicate) =
+  member __.FindAll(predicate) =
     map.TryFind(predicate) |> Option.defaultValue Vector.empty
 
-  member this.Add(rule) =
+  member __.Add(rule) =
     let predicate = (rule: Rule).Predicate
     let newRules = Vector.singleton rule
     let rules =
@@ -170,19 +169,18 @@ type Environment(map: Map<Variable, Term>) =
     else
       map |> Map.add v term
 
-  member this.TryFind(var) =
+  member __.TryFind(var) =
     tryFind var
 
-  member this.Substitute(term) =
+  member __.Substitute(term) =
     substitute term
 
-  member this.Add(var, term) =
+  member __.Add(var, term) =
     Environment(add var term)
 
   static member val Empty =
     Environment(Map.empty)
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Environment =
   let rec tryUnify term term' (env: Environment) =
     let tryUnifyVar var term (env: Environment) =
@@ -209,7 +207,6 @@ module Environment =
     | (_, _) ->
       None
 
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Knowledge =
   type private BacktrackFlow =
     | Break
@@ -227,7 +224,7 @@ module Knowledge =
     let prove prop env =
       ProveFunction(env, knowledge).Prove(prop: Proposition)
 
-    member this.Prove(prop: AtomicProposition) =
+    member __.Prove(prop: AtomicProposition) =
       let rules =
         knowledge.FindAll(prop.Predicate)
         |> Vector.map Rule.refresh

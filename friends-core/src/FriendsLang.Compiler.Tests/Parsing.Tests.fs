@@ -1,5 +1,9 @@
-namespace FriendsLang.Compiler
+namespace FriendsLang.Compiler.Parsing
 
+open FriendsLang.Compiler
+open FriendsLang.Compiler.Ast
+open FriendsLang.Compiler.Evaluating
+open FriendsLang.Compiler.Parsing
 open Persimmon
 open Persimmon.Syntax.UseTestNameByReflection
 
@@ -68,6 +72,11 @@ module ``test Parsing`` =
       case
         ( "「サーバル と かばんちゃん」の みみ"
         , listTerm [serval; kabanChan] |> app "みみ"
+        )
+      // Test unicode spaces.
+      case
+        ( "サーバル　と　かばんちゃん"
+        , listTerm [serval; kabanChan]
         )
       run body
     }
