@@ -1,5 +1,7 @@
 # try-friends
 
+*Under development*
+
 A web app to try Friends-lang.
 
 ## Directory Structure
