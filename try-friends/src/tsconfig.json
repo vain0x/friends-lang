@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "../dist",
+    "moduleResolution": "node",
+    "module": "es2015",
+    "target": "es2015",
+    "sourceMap": true,
+    "lib": [
+      "dom",
+      "es2015"
+    ],
+    "experimentalDecorators": true,
+    "strict": true,
+    "strictPropertyInitialization": false
+  },
+  "include": [
+    "*.ts",
+    "**/*.ts",
+  ]
+}
