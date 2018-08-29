@@ -1,14 +1,14 @@
 # フレンズ言語 (Friends-lang)
 
-[![Build Status](https://travis-ci.org/vain0/friends-lang.svg?branch=master)](https://travis-ci.org/vain0/friends-lang)
+[![Build Status](https://travis-ci.org/vain0x/friends-lang.svg?branch=master)](https://travis-ci.org/vain0x/friends-lang)
 
 **フレンズ言語** は、ジャパリパークのフレンズのためのプログラミング言語。
 
-- [すごーい！ きみはプログラミング言語を実装できるフレンズなんだね - Qiita](http://qiita.com/vain0/items/6d3b75f667d3ec7f1d2a)
+- [すごーい！ きみはプログラミング言語を実装できるフレンズなんだね - Qiita](http://qiita.com/vain0x/items/6d3b75f667d3ec7f1d2a)
 
 ## インストールと使い方
 
-- [最新版のパッケージをダウンロード](https://github.com/vain0/friends-lang/releases/latest)して展開します。
+- [最新版のパッケージをダウンロード](https://github.com/vain0x/friends-lang/releases/latest)して展開します。
     - Windows の場合は `friendsi-win-x64.zip`
     - macOS の場合は `friendsi-osx-x64.zip`
     - Linux の場合は `friendsi-linux-x64.zip`
