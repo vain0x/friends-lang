@@ -1,0 +1,166 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  font-size: 16px;
+}
+
+@media screen and (max-width: 719px) {
+  html,
+  body {
+    font-size: 14px;
+  }
+}
+
+#background {
+  background-image: url("/assets/savanna-small.jpg");
+  background-size: cover;
+  position: fixed;
+  z-index: -100;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+#background:before {
+  content: '';
+  background: inherit;
+  -webkit-filter: blur(5px);
+  -moz-filter: blur(5px);
+  -o-filter: blur(5px);
+  -ms-filter: blur(5px);
+  filter: blur(5px);
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  z-index: -100;
+}
+
+#main-content {
+  margin: 0 auto;
+  width: 700px;
+  overflow: initial;
+}
+
+@media screen and (max-width: 719px) {
+  #main-content {
+    padding: 8px;
+    width: 90%;
+  }
+}
+
+header #header-logo {
+  display: block;
+  width: auto;
+  height: 250px;
+}
+
+@media screen and (max-width: 719px) {
+  header #header-logo {
+    height: 100px;
+  }
+}
+
+footer {
+  padding: 0 0 4px 0;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 99.5%;
+  color: white;
+  text-align: right;
+  text-shadow: 1px 1px 1px #bdbdbd;
+  z-index: -1;
+}
+
+.friends-repl .stream {
+  display: flex;
+  flex-direction: column;
+}
+
+.friends-repl .stream .stream-item {
+  display: flex;
+}
+
+.friends-repl .stream .stream-item[data-type="rule"] {
+  flex-direction: row;
+}
+
+.friends-repl .stream .stream-item[data-type="rule"] .icon {
+  background: #f6a20e;
+}
+
+.friends-repl .stream .stream-item[data-type="query"] {
+  flex-direction: row;
+}
+
+.friends-repl .stream .stream-item[data-type="query"] .icon {
+  background: red;
+}
+
+.friends-repl .stream .stream-item[data-type="solution"] {
+  flex-direction: row-reverse;
+}
+
+.friends-repl .stream .stream-item[data-type="solution"] .icon {
+  background: green;
+}
+
+.friends-repl .stream .stream-item .icon {
+  width: 50px;
+  clip-path: circle(25px);
+  vertical-align: top;
+}
+
+.friends-repl .stream .stream-item .message {
+  margin: 0 8px 8px 8px;
+  padding: 16px 24px;
+  width: 300px;
+  border-radius: 24px;
+  background: white;
+}
+
+@media screen and (max-width: 719px) {
+  .friends-repl .stream .stream-item .message {
+    width: 150px;
+  }
+}
+
+.friends-repl-panel {
+  background: #fbfbfb;
+  margin: 16px 0;
+  padding: 13px;
+  border: solid 2px #f6a20e;
+}
+
+.friends-repl-editor {
+  width: 100%;
+}
+
+.friends-repl-solution {
+  min-height: 120px;
+  max-height: 240px;
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+
+.friends-repl button {
+  width: 84px;
+  height: 30px;
+}
+
+.friends-repl-ask-button {
+  background: #f6a20e;
+  font-weight: 900;
+}
+
+.friends-repl-yes-button {
+  color: #008000;
+}
+
+.friends-repl-no-button {
+  color: #000080;
+}

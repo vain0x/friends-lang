@@ -1,8 +1,6 @@
 {
-  "defaultSeverity": "error",
-  "extends": [
-    "tslint:recommended"
-  ],
+  "extends": [],
+  "defaultSeverity": "warn",
   "rules": {
     "semicolon": [
       true,
@@ -12,6 +10,13 @@
       true,
       "single"
     ],
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "always",
+        "singleline": "never"
+      }
+    ],
     "max-classes-per-file": false,
     "indent": true,
     "space-before-function-paren": false,
@@ -19,7 +24,6 @@
       false
     ],
     "arrow-parens": false,
-    // Pending fix for shorthand property names.
     "object-literal-sort-keys": false
   },
   "rulesDirectory": []
