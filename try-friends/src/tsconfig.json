@@ -2,20 +2,22 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "../dist",
-    "moduleResolution": "node",
-    "module": "es2015",
-    "target": "es2015",
-    "sourceMap": true,
+    "rootDir": ".",
+    "target": "es2016",
+    "module": "commonjs",
     "lib": [
-      "dom",
-      "es2015"
+      "es2016",
+      "dom"
     ],
-    "experimentalDecorators": true,
-    "strict": true,
-    "strictPropertyInitialization": false
+    "sourceMap": true,
+    "allowJs": true,
+    "jsx": "react",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "strict": true
   },
   "include": [
-    "*.ts",
-    "**/*.ts",
+    "client/**/*",
+    "core/**/*"
   ]
 }

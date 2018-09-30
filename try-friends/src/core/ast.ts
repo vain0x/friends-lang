@@ -2,8 +2,6 @@
  * Abstract syntax tree (AST).
  */
 
-import { Terminatorless } from 'babel-types';
-
 /**
  * Predicate.
  */

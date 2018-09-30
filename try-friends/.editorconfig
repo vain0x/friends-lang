@@ -1,4 +1,5 @@
-; Web
+root = true
+
 [*.{html,htm,pug,css,sass,scss,js,jsx,ts,tsx,vue}]
 indent_style = space
 indent_size = 2
