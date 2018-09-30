@@ -39,14 +39,14 @@ body {
   z-index: -100;
 }
 
-#main-content {
+#app-layout-component {
   margin: 0 auto;
   width: 700px;
   overflow: initial;
 }
 
 @media screen and (max-width: 719px) {
-  #main-content {
+  #app-layout-component {
     padding: 8px;
     width: 90%;
   }
