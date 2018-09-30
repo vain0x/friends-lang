@@ -1,19 +1,33 @@
-language: csharp
-dotnet: 2.0.0
-mono: none
-env:
-  global:
-    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-    - DOTNET_CLI_TELEMETRY_OPTOUT: 1
-os:
-  - linux
-  - osx
-sudo: false
-install:
-  - cd ./friends-core/src/
-  - dotnet restore
-  - cd ../../
-script:
-  - cd ./friends-core/src/
-  - chmod +x ./test.sh
-  - ./test.sh
+matrix:
+  include:
+  - name: friends-core
+    language: csharp
+    os:
+      - linux
+      - osx
+    dotnet: 2.0.0
+    mono: none
+    env:
+      global:
+        - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+        - DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    install:
+      - cd ./friends-core/src/
+      - dotnet restore
+      - cd ../../
+    script:
+      - cd ./friends-core/src/
+      - chmod +x ./test.sh
+      - ./test.sh
+  - name: try-friends
+    language: node_js
+    node_js:
+      - "8"
+    install:
+      - cd ./try-friends/src/
+      - yarn
+      - cd ../../
+    script:
+      - cd ./try-friends/src/
+      - yarn run test
+      - cd ../../
