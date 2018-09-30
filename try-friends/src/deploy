@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -xeu
+
+# Only for me.
+
+CLIENT_DIR=$(git rev-parse --show-toplevel)/try-friends/dist/client
+TARGET_DIR=$GHQ_ROOT/github.com/friends-lang/friends-lang.github.io
+
+cp -rT $CLIENT_DIR $TARGET_DIR
+
+(
+    cd $TARGET_DIR
+    git add .
+    git commit -m 'Update'
+    git push
+)

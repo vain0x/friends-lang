@@ -12,7 +12,10 @@
     "dev:test-build": "tsc --watch --project tsconfig-test.json",
     "dev:test-run": "mocha --watch ../dist/index.test.js",
     "prod": "run-s prod:build",
-    "prod:build": "cross-env NODE_ENV=production webpack --mode production"
+    "prod:build": "cross-env NODE_ENV=production webpack --mode production",
+    "deploy": "run-s prod:build deploy:commit deploy:push deploy:clean",
+    "deploy:build": "yarn run prod:build",
+    "deploy:push": "cd $/friends-lang.github.io && git subtree -P try-friends/dist/client push origin-release master"
   },
   "repository": {
     "type": "git",
