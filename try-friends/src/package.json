@@ -6,16 +6,16 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "run-p dev:*",
-    "dev:serve": "cross-env NODE_ENV=development webpack-dev-server --mode --watch",
-    "dev:test": "cross-env NODE_ENV=development mocha --watch",
+    "dev": "run-s test dev-all",
+    "dev-all": "run-p dev:*",
+    "dev:serve": "cross-env NODE_ENV=development webpack-dev-server --mode development --watch",
     "dev:test-build": "tsc --watch --project tsconfig-test.json",
-    "dev:test-run": "mocha --watch ../dist/index.test.js",
+    "dev:test-run": "mocha --watch ../dist/core/index.spec.js",
     "prod": "run-s prod:build",
     "prod:build": "cross-env NODE_ENV=production webpack --mode production",
-    "deploy": "run-s prod:build deploy:commit deploy:push deploy:clean",
-    "deploy:build": "yarn run prod:build",
-    "deploy:push": "cd $/friends-lang.github.io && git subtree -P try-friends/dist/client push origin-release master"
+    "test": "run-s test:build test:run",
+    "test:build": "tsc --project tsconfig-test.json",
+    "test:run": "mocha ../dist/core/index.spec.js"
   },
   "repository": {
     "type": "git",
