@@ -6,16 +6,13 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "npm run watch",
-    "prod": "run-s test build",
-    "watch": "run-p watch:*",
-    "watch:webpack": "cross-env NODE_ENV=development webpack --watch",
-    "watch:webpack-dev-server": "cross-env NODE_ENV=development webpack-dev-server --watch",
-    "watch:karma": "cross-env NODE_ENV=development karma start",
-    "build": "cross-env NODE_ENV=production webpack",
-    "test": "run-s test:build test:karma",
-    "test:build": "cross-env NODE_ENV=development webpack",
-    "test:karma": "cross-env NODE_ENV=development karma start --single-run"
+    "dev": "run-p dev:*",
+    "dev:serve": "cross-env NODE_ENV=development webpack-dev-server --mode --watch",
+    "dev:test": "cross-env NODE_ENV=development mocha --watch",
+    "dev:test-build": "tsc --watch --project tsconfig-test.json",
+    "dev:test-run": "mocha --watch ../dist/index.test.js",
+    "prod": "run-s prod:build",
+    "prod:build": "cross-env NODE_ENV=production webpack --mode production"
   },
   "repository": {
     "type": "git",
